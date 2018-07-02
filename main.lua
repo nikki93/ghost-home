@@ -1,3 +1,5 @@
+local wf = require 'https://raw.githubusercontent.com/SSYGEN/windfield/master/windfield/init.lua'
+
 local basePath = portal.path:gsub('/main.lua$', '')
 
 local x = portal.args.x
@@ -24,7 +26,7 @@ end
 
 function love.mousepressed()
     if portal.args.spawnChildren then
-        table.insert(children, portal:newChild('https://7859de82.ngrok.io/main.lua', {
+        table.insert(children, portal:newChild(portal.path, {
             x = love.graphics.getWidth() * math.random(),
             y = love.graphics.getHeight() * math.random(),
         }))
