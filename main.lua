@@ -1,5 +1,3 @@
-local http = require 'copas.http'
-
 local basePath = portal.path:gsub('/main.lua$', '')
 
 local x = portal.args.x
@@ -9,10 +7,10 @@ local children = {}
 
 local imgPath = basePath ..
         '/assets/tf_animals/tf_animals/individual_frames/animals1/animals1_34.png'
-local imgBytes = http.request(imgPath)
+local imgBytes = network.request(imgPath)
 local imgFileData = love.filesystem.newFileData(imgBytes, 'animals1_34.png')
-local imgCompData = love.image.newImageData(imgFileData)
-local img = love.graphics.newImage(imgCompData)
+local imgData = love.image.newImageData(imgFileData)
+local img = love.graphics.newImage(imgData)
 
 function love.draw()
     love.graphics.push('all')
