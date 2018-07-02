@@ -1,17 +1,22 @@
---print('main', _G)
-local t = require 'sub'
+local http = require 'copas.http'
 
-local fun = require 'https://raw.githubusercontent.com/luafun/luafun/master/fun.lua'
+local basePath = portal.path:gsub('/main.lua$', '')
 
 local x = portal.args.x
 local y = portal.args.y
 
 local children = {}
 
+local imgPath = basePath ..
+        '/assets/tf_animals/tf_animals/individual_frames/animals1/animals1_34.png'
+local imgBytes = http.request(imgPath)
+local imgFileData = love.filesystem.newFileData(imgBytes, 'animals1_34.png')
+local imgCompData = love.image.newImageData(imgFileData)
+local img = love.graphics.newImage(imgCompData)
+
 function love.draw()
     love.graphics.push('all')
-    love.graphics.setColor(1, 0, 0)
-    love.graphics.ellipse('fill', x, y, 20, 20)
+    love.graphics.draw(img, x, y)
     love.graphics.pop()
 
     for _, child in pairs(children) do
