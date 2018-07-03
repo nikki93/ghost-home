@@ -1,32 +1,32 @@
---local imgPath = basePath ..
---        '/assets/tf_animals/tf_animals/individual_frames/animals1/animals1_34.png'
---local imgBytes = network.request(imgPath)
---local imgFileData = love.filesystem.newFileData(imgBytes, 'animals1_34.png')
---local imgData = love.image.newImageData(imgFileData)
---local img = love.graphics.newImage(imgData)
+--local a = network.fetch('https://webhook.site/a5f9f71d-700d-4520-ae68-c49a0132662a')
+--local b = network.fetch('https://webhook.site/2437f2c5-f875-4b82-af1e-7ad21f3d5d58')
+--local c = network.fetch('https://webhook.site/3ba3be96-88c4-4278-b3c3-f12869b83166')
 
-local wf = require 'https://raw.githubusercontent.com/SSYGEN/windfield/master/windfield/init.lua'
+local N = 10
+
+local results = {}
+for i = 1, N do
+    network.async(function()
+        local response = network.fetch('https://raw.githubusercontent.com/ccheever/tetris-ghost/master/main.lua')
+        table.insert(results, response)
+    end)
+end
 
 function love.load()
-    world = wf.newWorld(0, 0, true)
-    world:setGravity(0, 512)
-
-    box = world:newRectangleCollider(400 - 50/2, 0, 50, 50)
-    box:setRestitution(0.8)
-    box:applyAngularImpulse(5000)
-
-    ground = world:newRectangleCollider(0, 550, 800, 50)
-    wall_left = world:newRectangleCollider(0, 0, 50, 600)
-    wall_right = world:newRectangleCollider(750, 0, 50, 600)
-    ground:setType('static') -- Types can be 'static', 'dynamic' or 'kinematic'. Defaults to 'dynamic'
-    wall_left:setType('static')
-    wall_right:setType('static')
 end
 
 function love.update(dt)
-    if world then world:update(dt) end
+    if #results == N then
+        local first = results[1]
+        for i = 2, N do
+            if results[i] ~= first then
+                print('nope')
+            end
+        end
+        print('yup')
+        results = {}
+    end
 end
 
 function love.draw()
-    if world then world:draw() end
 end
