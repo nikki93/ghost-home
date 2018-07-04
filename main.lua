@@ -1,7 +1,7 @@
 -- Load libs directly from their GitHub URIs!
 
 local sti = require 'https://raw.githubusercontent.com/karai17/Simple-Tiled-Implementation/master/sti/init.lua'
-local moonshine = require 'https://raw.githubusercontent.com/vrld/moonshine/master/init.lua'
+local moonshine = require 'https://raw.githubusercontent.com/nikki93/moonshine/master/init.lua'
 
 local map
 local TILE_SIZE = 16
@@ -10,8 +10,7 @@ local effect
 
 function love.load()
     map = sti('assets/maps/map1.lua')
-    effect = moonshine(moonshine.effects.filmgrain).chain(moonshine.effects.vignette)
-    effect.filmgrain.size = 2
+    effect = moonshine(moonshine.effects.vignette)
 end
 
 function love.draw()

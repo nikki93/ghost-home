@@ -69,6 +69,33 @@ return {
       encoding = "base64",
       compression = "zlib",
       data = "eJzt11GKwjAUBdD0d5xFdNRB3eTMLFHdh6g7MA9bJogf7YfUlHPgQuhX4JLkNSUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA3tE+5zAgx6k2yCinnLbLqkus19162eU8ye4Y66NJaVHkku79RZfRaZvzlfRZi03ucFskzmv02eZc03/Pn82k22SgZ33292ycyf77Tp9V+Mk9/RaJPuOe/U76nIPoM97Lvs++5z99VunxvqVu5bxrBqpfOR95M+unz3nR57yU/y9mWgAAAAAAAAAAAAAAAAAAAAAAAAAAgNe5Ad73I2k="
+    },
+    {
+      type = "tilelayer",
+      name = "Tile Layer 3",
+      x = 0,
+      y = 0,
+      width = 116,
+      height = 116,
+      visible = true,
+      opacity = 1,
+      offsetx = 0,
+      offsety = 0,
+      properties = {},
+      encoding = "base64",
+      compression = "zlib",
+      data = "eJzt1sENABAUBcHfJtF/HQpwFHnCTAV73CoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAbtfSAcBipAMAPtfTAWzzuG/ySAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAnDQBYkoBxQ=="
+    },
+    {
+      type = "objectgroup",
+      name = "Object Layer 1",
+      visible = true,
+      opacity = 1,
+      offsetx = 0,
+      offsety = 0,
+      draworder = "topdown",
+      properties = {},
+      objects = {}
     }
   }
 }
