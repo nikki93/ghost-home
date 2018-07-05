@@ -1,5 +1,6 @@
 local Visual = core.entity.newComponentType('Visual')
 
+
 -- Maintain references to all `Visual` instances as keys
 local all = {}
 
@@ -19,9 +20,10 @@ local function ensureOrder()
     end
 end
 
+
 function Visual:add()
     self._depth = 1
-    self.dependents = {}
+    self.visualComponents = {}
 
     all[self] = true
     orderDirty = true
@@ -32,6 +34,22 @@ function Visual:remove()
     orderDirty = true
 end
 
+
+-- Keep track of components that depend on us
+
+function Visual:addDependent(dependentType)
+    local dependent = self.ent[dependentType]
+    if dependent.draw then
+        self.visualComponents[dependent] = true
+    end
+end
+
+function Visual:removeDependent(dependentType)
+    local dependent = self.ent[dependentType]
+    self.visualComponents[dependent] = nil
+end
+
+
 function Visual:setDepth(newDepth)
     self._depth = newDepth
     orderDirty = true
@@ -41,25 +59,13 @@ function Visual:getDepth()
     return self._depth
 end
 
-function Visual:addDependent(dependentType)
-    local dependentInstance = self.ent[dependentType]
-    if dependentInstance.draw then
-        self.dependents[dependentInstance] = true
-    end
-end
 
-function Visual:removeDependent(dependentType)
-    local dependentInstance = self.ent[dependentType]
-    self.dependents[dependentInstance] = false
-end
-
+-- Draw all visual components on `love.draw`
 function love.draw()
     ensureOrder()
-
-    -- Render all visual component types for every visual entity
     for _, instance in ipairs(order) do
-        for dependent in pairs(instance.dependents) do
-            dependent:draw()
+        for comp in pairs(instance.visualComponents) do
+            comp:draw()
         end
     end
 end
