@@ -1,15 +1,15 @@
-local Spatial = entity.newComponentType('Spatial')
+local core = require 'core'
 
-local defaultX, defaultY = 0.5 * love.graphics.getWidth(), 0.5 * love.graphics.getHeight()
+local Spatial = core.entity.newComponentType('Spatial')
 
 function Spatial:add()
-    self.x, self.y = defaultX, defaultY
+    self.x, self.y = 0, 0
     self.width, self.height = 32, 32
     self.rotation = 0
 end
 
 
-local Visual = entity.newComponentType('Visual')
+local Visual = core.entity.newComponentType('Visual')
 
 -- Maintain references to all `Visual` instances as keys
 local all = {}
@@ -74,7 +74,7 @@ function love.draw()
 end
 
 
-local Sprite = entity.newComponentType('Sprite', {
+local Sprite = core.entity.newComponentType('Sprite', {
     depends = { 'Spatial', 'Visual' },
 })
 
@@ -83,6 +83,9 @@ local defaultImage = love.graphics.newImage('assets/avatar2.png')
 function Sprite:add()
     self.image = defaultImage
     self.scale = 1
+
+    local spatial = self.Spatial
+    spatial.width, spatial.height = self.image:getDimensions()
 end
 
 function Sprite:draw()
@@ -94,12 +97,14 @@ function Sprite:draw()
 end
 
 
-local ent1 = entity.newEntity()
-ent1:addComponent('Sprite')
+local ent1 = core.entity.new {
+    Sprite = {},
+}
 
-local ent2 = entity.newEntity()
-ent2:addComponent('Sprite')
-ent2.Spatial.x, ent2.Spatial.y = defaultX + 64, defaultY + 64
+local ent2 = core.entity.new {
+    Spatial = { x = 64, y = 64 },
+    Sprite = {},
+}
 
 function love.update(dt)
     ent2.Visual:setDepth(math.floor(love.timer.getTime()) % 2 == 0 and 2 or 0)
