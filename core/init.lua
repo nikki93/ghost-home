@@ -16,6 +16,8 @@ do
 end
 
 require 'core.entity'
+require 'core.default'
+require 'core.update'
 require 'core.spatial'
 require 'core.visual'
 require 'core.sprite'
