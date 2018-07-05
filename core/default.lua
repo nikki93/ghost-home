@@ -1,20 +1,12 @@
 local Default = core.entity.newComponentType('Default')
 
 
--- Generate unique IDs
-local lastId = 0
-local function newId()
-    lastId = lastId + 1
-    return lastId
-end
-
-
 -- Maintain all `Default` instances as keys, with their entities as values
 local all = {}
 
 
 function Default:add()
-    self.id = newId()
+    self.id = core.uuid()
 
     all[self] = self.ent
 end

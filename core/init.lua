@@ -15,6 +15,8 @@ do
     pcall(function() jit.on() end) -- May be permanently disabled, protect the call
 end
 
+core.uuid = require 'https://raw.githubusercontent.com/thibaultcha/lua-resty-jit-uuid/0.0.7/lib/resty/jit-uuid.lua'
+
 require 'core.entity'
 require 'core.default'
 require 'core.update'
