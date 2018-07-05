@@ -13,7 +13,7 @@ function RandomPosition:add()
 end
 
 
-for i = 1, 7000 do
+for i = 1, 4000 do
     core.entity.new {
         Sprite = {},
         RandomPosition = {},
