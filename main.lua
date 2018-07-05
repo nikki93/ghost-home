@@ -1,108 +1,11 @@
 local core = require 'core'
 
-local Spatial = core.entity.newComponentType('Spatial')
-
-function Spatial:add()
-    self.x, self.y = 0, 0
-    self.width, self.height = 32, 32
-    self.rotation = 0
-end
-
-
-local Visual = core.entity.newComponentType('Visual')
-
--- Maintain references to all `Visual` instances as keys
-local all = {}
-
--- Order to draw `Visual` instances in as an array -- `orderDirty` is whether it needs an update
-local order = {}
-local orderDirty = true
-
-function Visual:add()
-    self._depth = 1
-
-    -- Names of visual component types attached to this entity
-    self.dependentTypes = {}
-
-    all[self] = true
-    orderDirty = true
-end
-
-function Visual:remove()
-    all[self] = nil
-    orderDirty = true
-end
-
-function Visual:setDepth(newDepth)
-    self._depth = newDepth
-    orderDirty = true
-end
-
-function Visual:getDepth()
-    return self._depth
-end
-
-function Visual:addDependent(dependentType)
-    self.dependentTypes[dependentType] = true
-end
-
-function Visual:removeDependent(dependentType)
-    self.dependentTypes[dependentType] = false
-end
-
-function love.draw()
-    -- Update `order` if it's dirty
-    if orderDirty then
-        order = {}
-        for instance in pairs(all) do
-            table.insert(order, instance)
-        end
-        table.sort(order, function(i1, i2)
-            return i1._depth < i2._depth
-        end)
-    end
-
-    -- Render all visual component types for every visual entity
-    for _, instance in ipairs(order) do
-        for dependentType in pairs(instance.dependentTypes) do
-            local dependentInstance = instance.ent[dependentType]
-            if dependentInstance.draw then
-                dependentInstance:draw()
-            end
-        end
-    end
-end
-
-
-local Sprite = core.entity.newComponentType('Sprite', {
-    depends = { 'Spatial', 'Visual' },
-})
-
-local defaultImage = love.graphics.newImage('assets/avatar2.png')
-
-function Sprite:add()
-    self.image = defaultImage
-    self.scale = 1
-
-    local spatial = self.Spatial
-    spatial.width, spatial.height = self.image:getDimensions()
-end
-
-function Sprite:draw()
-    local spatial = self.Spatial
-    love.graphics.draw(self.image,
-        spatial.x, spatial.y, spatial.rotation,
-        self.scale, self.scale,
-        spatial.width / 2, spatial.height / 2)
-end
-
-
 local ent1 = core.entity.new {
     Sprite = {},
 }
 
 local ent2 = core.entity.new {
-    Spatial = { x = 64, y = 64 },
+    Spatial = { position = core.vec2(64, 64) },
     Sprite = {},
 }
 

@@ -1,4 +1,4 @@
-local entity = {}
+core.entity = {}
 
 
 -- Metadata abpout each component type, keyed by component type name. See `entity.newComponentType`
@@ -7,7 +7,7 @@ local componentInfos = {}
 
 -- Create a new component type with name `name`. `opts` is a table of the following options:
 --    - `depends`: Array of names of other component types this componnet requires in the entity
-function entity.newComponentType(name, opts)
+function core.entity.newComponentType(name, opts)
     if componentInfos[name] then
         error("component type with name '" .. name .. "' already exists!")
     end
@@ -46,7 +46,7 @@ local entityMeta = {
     end
 }
 
-function entity.new(init)
+function core.entity.new(init)
     local ent = {}
     setmetatable(ent, entityMeta)
     entities[ent] = ent
@@ -54,7 +54,6 @@ function entity.new(init)
     for componentType, props in pairs(init) do
         ent:addComponent(componentType)
         for k, v in pairs(props) do
-            print(componentType, k, v)
             ent[componentType][k] = v
         end
     end
@@ -110,6 +109,3 @@ function entityMethods:addComponent(componentType)
         end
     end
 end
-
-
-return entity
