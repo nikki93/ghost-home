@@ -29,6 +29,7 @@ function Update:removeDependent(dependentType)
     self.updatableComponents[dependent] = nil
 end
 
+
 -- Update all updatable components on `love.update`
 function love.update(dt)
     for instance in pairs(all) do
