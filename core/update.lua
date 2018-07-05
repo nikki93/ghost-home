@@ -26,7 +26,7 @@ end
 
 function Update:removeDependent(dependentType)
     local dependent = self.ent[dependentType]
-    self.updatableComponents[dependent] = false
+    self.updatableComponents[dependent] = nil
 end
 
 -- Update all updatable components on `love.update`
