@@ -12,7 +12,7 @@ do
     --core.bound2 = cpml.bound2
     --core.bound3 = cpml.bound3
 
-    jit.on()
+    pcall(function() jit.on() end) -- May be permanently disabled, protect the call
 end
 
 require 'core.entity'
