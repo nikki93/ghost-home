@@ -35,9 +35,8 @@ end
 -- access 'static' methods on no particular entity.
 core.entity.componentTypes = setmetatable({}, {
     __index = function(_, k)
-        local info = assert(componentInfos[k],
-            "no component type with name '" .. k .. "'")
-        return info.methods
+        local info = componentInfos[k]
+        return info and info.methods or nil
     end
 })
 
@@ -85,7 +84,6 @@ function entityMethods:addComponent(componentType)
         "no component type with name '" .. componentType .. "'")
 
     -- Already added?
---    local key = componentType:gsub('^.', string.lower)
     local key = componentType
     if self[key] then return end
 
