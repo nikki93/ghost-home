@@ -1,15 +1,22 @@
-local core = require 'core'
+require 'core'
 
-local ent1 = core.entity.new {
-    Sprite = {},
-}
 
-local ent2 = core.entity.new {
-    Spatial = { position = core.vec2(64, 64) },
-    Sprite = {},
-}
+local RandomPosition = core.entity.newComponentType('RandomPosition', {
+    depends = { 'Spatial' },
+})
 
-function love.update(dt)
-    ent2.Visual:setDepth(math.floor(love.timer.getTime()) % 2 == 0 and 2 or 0)
+function RandomPosition:add()
+    self.Spatial.position = core.vec2 {
+        x = math.random() * love.graphics.getWidth(),
+        y = math.random() * love.graphics.getHeight(),
+    }
+end
+
+
+for i = 1, 7000 do
+    core.entity.new {
+        Sprite = {},
+        RandomPosition = {},
+    }
 end
 
