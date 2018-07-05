@@ -7,6 +7,7 @@ local componentInfos = {}
 
 -- Create a new component type with name `name`. `opts` is a table of the following options:
 --    - `depends`: Array of names of other component types this componnet requires in the entity
+-- Returns the method table of the component, so that new methods may be added.
 function core.entity.newComponentType(name, opts)
     if componentInfos[name] then
         error("component type with name '" .. name .. "' already exists!")
@@ -30,16 +31,24 @@ function core.entity.newComponentType(name, opts)
     return info.methods
 end
 
+-- Find the method table for a component type by using its name as an index. Can be used to eg.
+-- access 'static' methods on no particular entity.
+core.entity.componentTypes = setmetatable({}, {
+    __index = function(_, k)
+        local info = assert(componentInfos[k],
+            "no component type with name '" .. k .. "'")
+        return info.methods
+    end
+})
 
--- Map such that `entities[ent] == ent` for all entities `ent`
-local entities = {}
 
 local entityMethods = {}
 
 local entityMeta = {
     __index = entityMethods,
 
-    -- Disable adding keys directly in the entity
+    -- Disable adding keys directly in the entity. This makes it so fields can only be directly
+    -- set on entities using `rawset`, which raises eyebrows.
     __newindex = function(t, k, v)
         error("attempted to directly set key '" .. k .. "' in entity -- please store data in " ..
             "a component inside the entity instead")
@@ -49,7 +58,8 @@ local entityMeta = {
 function core.entity.new(init)
     local ent = {}
     setmetatable(ent, entityMeta)
-    entities[ent] = ent
+
+    ent:addComponent('Default')
 
     for componentType, props in pairs(init) do
         ent:addComponent(componentType)
@@ -63,12 +73,11 @@ end
 
 function entityMethods:destroy()
     rawset(self, 'destroyed', true)
-    for _, component in pairs(self) do
-        if component.remove then
-            component:remove()
+    for key, component in pairs(self) do
+        if componentInfos[key] and component.remove then
+            component:remove(true)
         end
     end
-    entities[self] = nil
 end
 
 function entityMethods:addComponent(componentType)
@@ -109,3 +118,4 @@ function entityMethods:addComponent(componentType)
         end
     end
 end
+
