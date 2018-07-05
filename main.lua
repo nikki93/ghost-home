@@ -13,10 +13,31 @@ function RandomPosition:add()
 end
 
 
-for i = 1, 1000 do
+local Rotating = core.entity.newComponentType('Rotating', {
+    depends = { 'Spatial', 'Update' },
+})
+
+function Rotating:add()
+    self.rotationSpeed = math.pi
+end
+
+function Rotating:update(dt)
+    self.Spatial.rotation = self.Spatial.rotation + self.rotationSpeed * dt
+
+    if love.keyboard.isDown('a') then
+        if self.Spatial.position.y > 0.5 * love.graphics.getHeight() then
+            self.ent:destroy()
+        end
+    end
+end
+
+
+for i = 1, 5 do
     core.entity.new {
         Sprite = {},
         RandomPosition = {},
+        Rotating = {},
     }
 end
+
 
