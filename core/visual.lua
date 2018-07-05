@@ -21,9 +21,7 @@ end
 
 function Visual:add()
     self._depth = 1
-
-    -- Visual component instances attached to this entity as keys
-    self.visuals = {}
+    self.dependents = {}
 
     all[self] = true
     orderDirty = true
@@ -46,13 +44,13 @@ end
 function Visual:addDependent(dependentType)
     local dependentInstance = self.ent[dependentType]
     if dependentInstance.draw then
-        self.visuals[dependentInstance] = true
+        self.dependents[dependentInstance] = true
     end
 end
 
 function Visual:removeDependent(dependentType)
     local dependentInstance = self.ent[dependentType]
-    self.visuals[dependentInstance] = false
+    self.dependents[dependentInstance] = false
 end
 
 function love.draw()
@@ -60,8 +58,8 @@ function love.draw()
 
     -- Render all visual component types for every visual entity
     for _, instance in ipairs(order) do
-        for visual in pairs(instance.visuals) do
-            visual:draw()
+        for dependent in pairs(instance.dependents) do
+            dependent:draw()
         end
     end
 end
