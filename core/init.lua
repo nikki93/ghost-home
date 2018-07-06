@@ -3,8 +3,8 @@ core = {}
 do
     jit.off() -- Use non-FFI versions of CPML
 
-    core.vec2 = require 'https://raw.githubusercontent.com/excessive/cpml/130fe2aca042b39299d16bd63df3aa606fe630ad/modules/vec2.lua'
-    core.color = require 'https://raw.githubusercontent.com/excessive/cpml/130fe2aca042b39299d16bd63df3aa606fe630ad/modules/color.lua'
+    core.vec2 = require 'core.vec2'
+    core.color = require 'core.color'
 
     -- Skip 3d math stuff for now
     --core.vec3 = cpml.vec3
