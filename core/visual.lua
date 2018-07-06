@@ -23,7 +23,7 @@ end
 
 function Visual:add()
     self._depth = 1
-    self.visualComponents = {}
+    self._visualComponents = {}
 
     all[self] = true
     orderDirty = true
@@ -40,13 +40,13 @@ end
 function Visual:addDependent(dependentType)
     local dependent = self.ent[dependentType]
     if dependent.draw then
-        self.visualComponents[dependent] = true
+        self._visualComponents[dependent] = true
     end
 end
 
 function Visual:removeDependent(dependentType)
     local dependent = self.ent[dependentType]
-    self.visualComponents[dependent] = nil
+    self._visualComponents[dependent] = nil
 end
 
 
@@ -64,7 +64,7 @@ end
 function love.draw()
     ensureOrder()
     for _, instance in ipairs(order) do
-        for comp in pairs(instance.visualComponents) do
+        for comp in pairs(instance._visualComponents) do
             comp:draw()
         end
     end
