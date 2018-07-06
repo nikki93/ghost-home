@@ -13,7 +13,7 @@ local editor
 
 function Editor:add()
     if editor then
-        error("'Editor' component must be added to at most one entity -- the editor!")
+        error("'Editor' component must be added to at most one entity -- the editor itself!")
     end
     editor = self
 
@@ -75,6 +75,40 @@ function propEditors.string(value)
     end
 end
 
+-- `core.vec2` -- two-field input for 2d vector
+propEditors[getmetatable(core.vec2(0, 0))] = function(value)
+    local x, y, changed = tui.inputFloat2('', value.x, value.y,
+        { extraFlags = { EnterReturnsTrue = true } })
+    if not changed then return nil, false end
+    return core.vec2(x, y), true
+end
+
+-- `core.color` -- color picker
+propEditors[getmetatable(core.color(0, 0, 0, 0))] = function(value)
+    local r, g, b, a, changed = tui.colorEdit4('',
+        value.r, value.g, value.b, value.a, {
+            AlphaBar = true,
+            Float = true,
+            PickerHueWheel = true,
+        })
+    if not changed then return nil, false end
+    return core.color(r, g, b, a), true
+end
+
+-- Common property value editor entrypoint -- dispatches to one of the above based on type
+local function propEditor(comp, propName, value)
+    local propEditor = propEditors[getmetatable(value)] or propEditors[type(value)]
+    if propEditor then
+        tui.withItemWidth(-1, function()
+            local new, changed = propEditor(value)
+            if changed then comp[propName] = new end
+        end)
+    else
+        tui.alignTextToFramePadding()
+        tui.text('<unsupported>')
+    end
+end
+
 
 -- TUI block (inside the window) for component with name `key` in entity `ent`
 function Editor:editComponent(ent, key)
@@ -91,18 +125,8 @@ function Editor:editComponent(ent, key)
                 tabbedText(propName)
                 tui.sameLine()
 
-                -- Editor for property value -- select an editor based on type
-                local propType = type(value)
-                local propEditor = propEditors[propType]
-                if propEditor then
-                    tui.withItemWidth(-1, function()
-                        local new, changed = propEditor(value)
-                        if changed then comp[propName] = new end
-                    end)
-                else
-                    tui.alignTextToFramePadding()
-                    tui.text('<unsupported>')
-                end
+                -- Editor for property value
+                propEditor(comp, propName, value)
             end)
         end
     end
