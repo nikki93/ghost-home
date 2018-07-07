@@ -143,7 +143,8 @@ function entityMethods:removeComponent(componentType, removeDependents)
             self:removeComponent(dependent.__typeName, true)
         end
     elseif next(component.__dependents) then
-        error("attempted to remove '" .. componentType .. "', a dependency for other components")
+        error("attempted to remove component '" .. componentType .. "', a dependency for other " ..
+                "components such as '" .. next(component.__dependents).__typeName .. "'")
     end
 
     -- Notify dependencies
