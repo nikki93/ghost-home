@@ -46,7 +46,13 @@ for cb in pairs(inputCallbacks) do -- Initialize to empty for every callback
     listeners[cb] = {}
 end
 
--- Keep track of components that depend on us
+
+function Input:add()
+    self.enabled = false
+end
+
+
+-- Keep track of listeners
 
 function Input:addDependent(dependentType)
     local dependent = self.ent[dependentType]
@@ -66,12 +72,15 @@ function Input:removeDependent(dependentType)
     end
 end
 
+
 -- Notify all listeners on each Love input callback
 
 for cb in pairs(inputCallbacks) do
     love[cb] = function(...)
         for listener in pairs(listeners[cb]) do
-            listener[cb](listener, ...)
+            if listener.Input.enabled then
+                listener[cb](listener, ...)
+            end
         end
     end
 end
