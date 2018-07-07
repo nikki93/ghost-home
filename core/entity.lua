@@ -25,7 +25,7 @@ function core.entity.newComponentType(name, opts)
     end
 
     -- Initialize `methods` table
-    info.methods = {}
+    info.methods = { __typeName = name }
 
     componentInfos[name] = info
     return info.methods
@@ -50,7 +50,7 @@ local entityMeta = {
     -- set on entities using `rawset`, which raises eyebrows.
     __newindex = function(t, k, v)
         error("attempted to directly set key '" .. k .. "' in entity -- please store data in " ..
-            "a component inside the entity instead")
+                "a component inside the entity instead")
     end
 }
 
@@ -60,10 +60,11 @@ function core.entity.new(init)
 
     ent:addComponent('Default')
 
+    -- Add components from initializer and set props
     for componentType, props in pairs(init) do
-        ent:addComponent(componentType)
+        local component = ent:addComponent(componentType)
         for k, v in pairs(props) do
-            ent[componentType][k] = v
+            component[k] = v
         end
     end
 
@@ -71,10 +72,13 @@ function core.entity.new(init)
 end
 
 function entityMethods:destroy()
+    assert(not rawget(self, 'destroyed'), "entity already destroyed!")
     rawset(self, 'destroyed', true)
-    for key, component in pairs(self) do
-        if componentInfos[key] and component.remove then
-            component:remove(true)
+
+    -- Remove all components
+    for key in pairs(self) do
+        if componentInfos[key] then
+            self:removeComponent(key, true)
         end
     end
 end
@@ -93,7 +97,9 @@ function entityMethods:addComponent(componentType)
     end
 
     -- Create and add to entity
-    local component = setmetatable({}, {
+    local component = setmetatable({
+        __dependents = {}
+    }, {
         __index = info.methods,
     })
     rawset(self, key, component)
@@ -111,9 +117,51 @@ function entityMethods:addComponent(componentType)
 
     -- Notify dependencies
     for _, dep in ipairs(info.depends) do
-        if self[dep].addDependent then
-            self[dep]:addDependent(componentType)
+        local dependency = assert(self[dep],
+            "'" .. componentType .. "' depends on '" .. dep .. "' but it's not present!")
+        dependency.__dependents[component] = true
+        if dependency.addDependent then
+            dependency:addDependent(componentType)
         end
     end
+
+    return component
+end
+
+function entityMethods:removeComponent(componentType, removeDependents)
+    local info = assert(componentInfos[componentType],
+        "no component type with name '" .. componentType .. "'")
+
+    -- Get component instance
+    local key = componentType
+    local component = assert(self[key],
+        "entity doesn't have component type with name '" .. componentType .. "'")
+
+    -- Remove dependents?
+    if removeDependents then
+        for dependent in pairs(component.__dependents) do
+            self:removeComponent(dependent.__typeName, true)
+        end
+    elseif next(component.__dependents) then
+        error("attempted to remove '" .. componentType .. "', a dependency for other components")
+    end
+
+    -- Notify dependencies
+    for _, dep in ipairs(info.depends) do
+        local dependency = assert(self[dep],
+            "'" .. componentType .. "' depends on '" .. dep .. "' but it's not present!")
+        if dependency.removeDependent then
+            dependency:removeDependent(componentType)
+        end
+        dependency.__dependents[component] = nil
+    end
+
+    -- Call `remove` method
+    if component.remove then
+        component:remove()
+    end
+
+    -- Remove
+    rawset(self, componentType, nil)
 end
 
