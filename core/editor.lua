@@ -21,12 +21,14 @@ function Editor:add()
     end
     editor = self
 
+    -- Dependency config
+    self.Input.enabled = true -- Always listen for `Input` to allow edit-mode hotkey
+    self.Visual:setDepth(1000) -- Draw editor overlays in front of everything else
+
+    -- State
     self.enabled = false
-    self.Visual:setDepth(1000)
 
-    self.Input.enabled = true
-
-    -- See bottom for descriptions of these
+    -- Our config -- see below for description
     self.componentOrder = {}
     self.hiddenProps = {}
 end
@@ -34,6 +36,24 @@ end
 function Editor:remove()
     editor = nil
 end
+
+-- Create singleton instance after defining `:add()` method
+editor = core.entity.new {
+    Editor = {
+        -- Order to display components in
+        componentOrder = {
+            'Default',
+            'Spatial',
+            'Visual',
+            'Update',
+            'Sprite',
+        },
+        -- Commonly known hidden props
+        hiddenProps = {
+            ent = true,
+        }
+    },
+}
 
 
 ----------------------------------------------------------------------------------------------------
@@ -233,25 +253,3 @@ function Editor:mousepressed(x, y, button)
     end
 end
 
-
-----------------------------------------------------------------------------------------------------
---- Config -----------------------------------------------------------------------------------------
-----------------------------------------------------------------------------------------------------
-
--- Create singleton instance after defining component methods (especially `:add()`)
-editor = core.entity.new {
-    Editor = {
-        -- Order to display components in
-        componentOrder = {
-            'Default',
-            'Spatial',
-            'Visual',
-            'Update',
-            'Sprite',
-        },
-        -- Commonly known hidden props
-        hiddenProps = {
-            ent = true,
-        }
-    },
-}
