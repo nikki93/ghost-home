@@ -6,7 +6,6 @@ local all = {}
 
 
 function Update:add()
-    self._updatableComponents = {}
     all[self] = true
 end
 
@@ -15,26 +14,11 @@ function Update:remove()
 end
 
 
--- Keep track of components that depend on us
-
-function Update:addDependent(dependentType)
-    local dependent = self.ent[dependentType]
-    if dependent.update then
-        self._updatableComponents[dependent] = true
-    end
-end
-
-function Update:removeDependent(dependentType)
-    local dependent = self.ent[dependentType]
-    self._updatableComponents[dependent] = nil
-end
-
-
 -- Update all updatable components on `love.update`
 function love.update(dt)
     for instance in pairs(all) do
-        for comp in pairs(instance._updatableComponents) do
-            comp:update(dt)
+        for dependent in pairs(instance.__dependents) do
+            dependent:update(dt)
         end
     end
 end
