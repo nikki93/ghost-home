@@ -20,6 +20,7 @@ core.uuid = require 'https://raw.githubusercontent.com/thibaultcha/lua-resty-jit
 require 'core.entity'
 require 'core.default'
 require 'core.update'
+require 'core.input'
 require 'core.spatial'
 require 'core.visual'
 require 'core.editor'
