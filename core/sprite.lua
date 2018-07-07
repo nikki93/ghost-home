@@ -14,14 +14,16 @@ function Sprite:add()
 end
 
 function Sprite:draw()
-    local spatial = self.Spatial
-    local halfSize = spatial.size / 2
     local prevR, prevG, prevB, prevA = love.graphics.getColor()
     love.graphics.setColor(self.color.r, self.color.g, self.color.b, self.color.a)
+
+    local spatial = self.Spatial
+    local halfSize = spatial.size / 2
     love.graphics.draw(self.image,
         spatial.position.x, spatial.position.y,
         spatial.rotation,
         self.scale, self.scale,
         halfSize.x, halfSize.y)
+
     love.graphics.setColor(prevR, prevG, prevB, prevA)
 end
