@@ -1,5 +1,7 @@
 core.entity = {}
 
+-- Common methods for all components
+local baseComponentMethods = {}
 
 -- Metadata abpout each component type, keyed by component type name. See `entity.newComponentType`
 -- below for format.
@@ -25,7 +27,13 @@ function core.entity.newComponentType(name, opts)
     end
 
     -- Initialize `methods` table
-    info.methods = { __typeName = name }
+    info.methods = setmetatable({
+        __typeName = name,
+        __info = info,
+    }, { __index = baseComponentMethods })
+
+    -- Initialize `entities` index
+    info.entities = {}
 
     componentInfos[name] = info
     return info.methods
@@ -39,6 +47,12 @@ core.entity.componentTypes = setmetatable({}, {
         return info and info.methods or nil
     end
 })
+
+-- Get all entities that contain this component type. Keys are entities, values are the
+-- component instances for those entities.
+function baseComponentMethods:getAll()
+    return self.__info.entities
+end
 
 
 local entityMethods = {}
@@ -104,6 +118,9 @@ function entityMethods:addComponent(componentType)
     })
     rawset(self, key, component)
 
+    -- Add to `entities` index
+    info.entities[self] = component
+
     -- Link dependencies
     for _, dep in ipairs(info.depends) do
         component[dep] = self[dep]
@@ -161,6 +178,9 @@ function entityMethods:removeComponent(componentType, removeDependents)
     if component.remove then
         component:remove()
     end
+
+    -- Remove from `entities` index
+    info.entities[self] = nil
 
     -- Remove
     rawset(self, componentType, nil)
