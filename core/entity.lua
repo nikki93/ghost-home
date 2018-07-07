@@ -1,6 +1,7 @@
 core.entity = {}
 
--- Common methods for all components
+
+-- Common methods for all component instances, of any type
 local baseComponentMethods = {}
 
 -- Metadata abpout each component type, keyed by component type name. See `entity.newComponentType`
@@ -39,6 +40,12 @@ function core.entity.newComponentType(name, opts)
     return info.methods
 end
 
+-- Get all entities that contain this component type. Keys are entities, values are the
+-- component instances for those entities.
+function baseComponentMethods:getAll()
+    return self.__info.entities
+end
+
 -- Find the method table for a component type by using its name as an index. Can be used to eg.
 -- access 'static' methods on no particular entity.
 core.entity.componentTypes = setmetatable({}, {
@@ -48,13 +55,8 @@ core.entity.componentTypes = setmetatable({}, {
     end
 })
 
--- Get all entities that contain this component type. Keys are entities, values are the
--- component instances for those entities.
-function baseComponentMethods:getAll()
-    return self.__info.entities
-end
 
-
+-- Methods for entity instances
 local entityMethods = {}
 
 local entityMeta = {
@@ -182,7 +184,7 @@ function entityMethods:removeComponent(componentType, removeDependents)
     -- Remove from `entities` index
     info.entities[self] = nil
 
-    -- Remove
+    -- Remove from entity
     rawset(self, componentType, nil)
 end
 
