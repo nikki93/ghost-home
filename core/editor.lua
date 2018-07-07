@@ -4,7 +4,7 @@
 
 
 local Editor = core.entity.newComponentType('Editor', {
-    depends = { 'Update' },
+    depends = { 'Input', 'Update', 'Visual' },
 })
 
 
@@ -16,6 +16,11 @@ function Editor:add()
         error("'Editor' component must be added to at most one entity -- the editor itself!")
     end
     editor = self
+
+    self.enabled = false
+    self.Visual:setDepth(1000)
+
+    self.Input.enabled = true
 
     -- See bottom for descriptions of these
     self.componentOrder = {}
@@ -40,7 +45,7 @@ local propEditors = {}
 
 -- Basic boolean: checkbox
 function propEditors.boolean(value)
-    return ui.checkbox('', value)
+    return tui.checkbox('', value)
 end
 
 -- Basic number: direct input
@@ -132,9 +137,11 @@ function Editor:editComponent(ent, key)
     end
 end
 
--- Draw TUIs for all entities editing is enabled for
+-- Draw TUIs for selecte entities
 function Editor:update(dt)
-    for _, ent in pairs(core.entity.componentTypes.Default.getAll()) do
+    if not self.enabled then return end
+
+    for ent in pairs(core.entity.componentTypes.Default:getAll()) do
         -- Window title with last few characters of `Default.id`
         local shortId = ent.Default.id:sub(-5)
         tui.inWindow('ent-' .. shortId, function()
@@ -162,6 +169,37 @@ function Editor:update(dt)
                 end
             end
         end)
+    end
+end
+
+function Editor:draw()
+    if not self.enabled then return end
+
+    love.graphics.push('all')
+    love.graphics.setColor(0, 1, 0)
+    for ent in pairs(core.entity.componentTypes.Spatial:getAll()) do
+        local spatial = ent.Spatial
+
+        love.graphics.push()
+
+        local position = spatial.position
+        love.graphics.translate(position.x, position.y)
+
+        love.graphics.rotate(spatial.rotation)
+
+        local size = spatial.size
+        local halfSize = spatial.size / 2
+        love.graphics.rectangle('line', -halfSize.x, -halfSize.y, size.x, size.y)
+
+        love.graphics.pop()
+    end
+    love.graphics.pop()
+end
+
+function Editor:keypressed(key)
+    if key == 'e' and self.Input.enabled and
+            (love.keyboard.isDown('lctrl') or love.keyboard.isDown('rctrl')) then
+        self.enabled = not self.enabled
     end
 end
 
