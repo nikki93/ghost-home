@@ -3,6 +3,10 @@
 -- settings of the editor itself.
 
 
+----------------------------------------------------------------------------------------------------
+--- Basic ------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+
 local Editor = core.entity.newComponentType('Editor', {
     depends = { 'Input', 'Update', 'Visual' },
 })
@@ -31,6 +35,10 @@ function Editor:remove()
     editor = nil
 end
 
+
+----------------------------------------------------------------------------------------------------
+--- UI ---------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
 
 -- TUI text followed by a 'tab' for aligning tabular data
 local tabWidth = 8
@@ -115,7 +123,7 @@ local function propEditor(comp, propName, value)
 end
 
 
--- TUI block (inside the window) for component with name `key` in entity `ent`
+-- TUI block for component with name `key` in entity `ent`
 function Editor:editComponent(ent, key)
     local comp = ent[key]
     for propName, value in pairs(comp) do -- Iterate through properties in the component
@@ -137,49 +145,60 @@ function Editor:editComponent(ent, key)
     end
 end
 
--- Draw TUIs for selecte entities
+-- TUI block for entity `ent`
+function Editor:editEntity(ent)
+    -- Compute order to show components in
+    local order = {}
+    local visited = {}
+    for _, key in pairs(self.componentOrder) do -- First add from `componentOrder`
+        if ent[key] then
+            table.insert(order, key)
+            visited[key] = true
+        end
+    end
+    for key in pairs(ent) do -- Then add the rest
+        if not visited[key] and core.entity.componentTypes[key] then
+            table.insert(order, key)
+        end
+    end
+
+    -- Show sections for each component
+    for _, key in ipairs(order) do
+        if tui.collapsingHeader(key, { DefaultOpen = true }) then
+            tui.withID(key, function()
+                self:editComponent(ent, key)
+            end)
+        end
+    end
+end
+
+
 function Editor:update(dt)
     if not self.enabled then return end
 
-    for ent in pairs(core.entity.componentTypes.Default:getAll()) do
-        -- Window title with last few characters of `Default.id`
-        local shortId = ent.Default.id:sub(-5)
-        tui.inWindow('ent-' .. shortId, function()
-            -- Compute order to show components in
-            local order = {}
-            local visited = {}
-            for _, key in pairs(self.componentOrder) do -- First add from `componentOrder`
-                if ent[key] then
-                    table.insert(order, key)
-                    visited[key] = true
-                end
-            end
-            for key in pairs(ent) do -- Then add the rest
-                if not visited[key] and core.entity.componentTypes[key] then
-                    table.insert(order, key)
-                end
-            end
+    -- Draw TUIs for selected entities
+    tui.inWindow('editor', function()
+        -- TODO(nikki): Actually iterate over entities in a selection here
+        local ent = next(core.entity.componentTypes.Default:getAll())
 
-            -- Show sections for each component
-            for _, key in ipairs(order) do
-                if tui.collapsingHeader(key, { DefaultOpen = true }) then
-                    tui.withID(key, function()
-                        self:editComponent(ent, key)
-                    end)
-                end
-            end
+        tui.inChild('selected', function()
+            self:editEntity(ent)
         end)
-    end
+    end)
 end
+
+
+----------------------------------------------------------------------------------------------------
+--- Draw -------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
 
 function Editor:draw()
     if not self.enabled then return end
 
+    -- Draw bounding boxes for all `Spatial` entities
     love.graphics.push('all')
     love.graphics.setColor(0, 1, 0)
-    for ent in pairs(core.entity.componentTypes.Spatial:getAll()) do
-        local spatial = ent.Spatial
-
+    for ent, spatial in pairs(core.entity.componentTypes.Spatial:getAll()) do
         love.graphics.push()
 
         local position = spatial.position
@@ -196,6 +215,11 @@ function Editor:draw()
     love.graphics.pop()
 end
 
+
+----------------------------------------------------------------------------------------------------
+--- Input ------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+
 function Editor:keypressed(key)
     if key == 'e' and self.Input.enabled and
             (love.keyboard.isDown('lctrl') or love.keyboard.isDown('rctrl')) then
@@ -203,6 +227,16 @@ function Editor:keypressed(key)
     end
 end
 
+function Editor:mousepressed(x, y, button)
+    if not tui.wantMouse() then
+        -- TODO(nikki): Select by click
+    end
+end
+
+
+----------------------------------------------------------------------------------------------------
+--- Config -----------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
 
 -- Create singleton instance after defining component methods (especially `:add()`)
 editor = core.entity.new {
