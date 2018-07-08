@@ -18,12 +18,37 @@ end
 core.uuid = require 'https://raw.githubusercontent.com/thibaultcha/lua-resty-jit-uuid/0.0.7/lib/resty/jit-uuid.lua'
 
 require 'core.entity'
+require 'core.edit'
+require 'core.edit_tui'
+
 require 'core.default'
 require 'core.update'
 require 'core.input'
+
 require 'core.spatial'
 require 'core.visual'
-require 'core.editor'
+
 require 'core.sprite'
+
+
+-- Default editor
+
+core.entity.new {
+    Edit = {},
+    EditTUI = {
+        componentOrder = {
+            'Default',
+            'Spatial',
+            'Visual',
+            'Update',
+            'Sprite',
+        },
+        hiddenProps = {
+            ent = true,
+        },
+    },
+    EditSpatialBBoxes = {},
+}
+
 
 return core
