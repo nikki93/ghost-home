@@ -1,8 +1,8 @@
--- `Edit` extension that shows a TUI window allowing launching editor functionality, and shows
+-- `Editor` extension that shows a TUI window allowing launching editor functionality, and shows
 -- TUIs for selected entities with their components and properties.
 
-local EditTUI = core.entity.newComponentType('EditTUI', {
-    depends = { 'Edit' },
+local EditorTUI = core.entity.newComponentType('EditorTUI', {
+    depends = { 'Editor' },
 })
 
 
@@ -15,20 +15,20 @@ local function tabbedText(text)
 end
 
 -- Table of types to functions for a TUI for that type of property
-local propEdits = {}
+local propEditors = {}
 
 -- Basic boolean: checkbox
-function propEdits.boolean(value)
+function propEditors.boolean(value)
     return tui.checkbox('', value)
 end
 
 -- Basic number: direct input
-function propEdits.number(value)
+function propEditors.number(value)
     return tui.inputFloat('', value, { extraFlags = { EnterReturnsTrue = true } })
 end
 
 -- Basic string: single or multiline text input
-function propEdits.string(value)
+function propEditors.string(value)
     if value:find('\n') then -- Multi-line
         local cache = tui.cache()
         local changed
@@ -55,7 +55,7 @@ function propEdits.string(value)
 end
 
 -- `core.vec2` -- two-field input for 2d vector
-propEdits[getmetatable(core.vec2(0, 0))] = function(value)
+propEditors[getmetatable(core.vec2(0, 0))] = function(value)
     local x, y, changed = tui.inputFloat2('', value.x, value.y,
         { extraFlags = { EnterReturnsTrue = true } })
     if not changed then return nil, false end
@@ -63,8 +63,8 @@ propEdits[getmetatable(core.vec2(0, 0))] = function(value)
 end
 
 -- `core.color` -- color picker
-propEdits[getmetatable(core.color(0, 0, 0, 0))] = function(value)
-    local r, g, b, a, changed = tui.colorEdit4('',
+propEditors[getmetatable(core.color(0, 0, 0, 0))] = function(value)
+    local r, g, b, a, changed = tui.colorEditor4('',
         value.r, value.g, value.b, value.a, {
             AlphaBar = true,
             Float = true,
@@ -75,11 +75,11 @@ propEdits[getmetatable(core.color(0, 0, 0, 0))] = function(value)
 end
 
 -- Common property value editor entrypoint -- dispatches to one of the above based on type
-local function propEdit(comp, propName, value)
-    local propEdit = propEdits[getmetatable(value)] or propEdits[type(value)]
-    if propEdit then
+local function propEditor(comp, propName, value)
+    local propEditor = propEditors[getmetatable(value)] or propEditors[type(value)]
+    if propEditor then
         tui.withItemWidth(-1, function()
-            local new, changed = propEdit(value)
+            local new, changed = propEditor(value)
             if changed then comp[propName] = new end
         end)
     else
@@ -90,7 +90,7 @@ end
 
 
 -- TUI block for component with name `key` in entity `ent`
-function EditTUI:editComponent(ent, key)
+function EditorTUI:editComponent(ent, key)
     local comp = ent[key]
     for propName, value in pairs(comp) do -- Iterate through properties in the component
         -- Check if hidden prop
@@ -104,15 +104,15 @@ function EditTUI:editComponent(ent, key)
                 tabbedText(propName)
                 tui.sameLine()
 
-                -- Edit for property value
-                propEdit(comp, propName, value)
+                -- Editor for property value
+                propEditor(comp, propName, value)
             end)
         end
     end
 end
 
 -- TUI block for entity `ent`
-function EditTUI:editEntity(ent)
+function EditorTUI:editEntity(ent)
     -- Compute order to show components in
     local order = {}
     local visited = {}
@@ -138,10 +138,10 @@ function EditTUI:editEntity(ent)
     end
 end
 
-function EditTUI:update(dt)
+function EditorTUI:update(dt)
     tui.inWindow('editor', function()
         tui.inChild('selected', function()
-            for ent in pairs(self.Edit.selection) do
+            for ent in pairs(self.Editor.selection) do
                 self:editEntity(ent)
             end
         end)

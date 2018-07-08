@@ -7,13 +7,13 @@ function Spatial:add()
 end
 
 
--- `Edit` extension that draws bounding boxes of all `Spatial` entities
+-- `Editor` extension that draws bounding boxes of all `Spatial` entities
 
-local EditSpatialBBoxes = core.entity.newComponentType('EditSpatialBBoxes', {
-    depends = { 'Edit' },
+local EditorSpatialBBoxes = core.entity.newComponentType('EditorSpatialBBoxes', {
+    depends = { 'Editor' },
 })
 
-function EditSpatialBBoxes:drawOverlay()
+function EditorSpatialBBoxes:drawOverlay()
     love.graphics.push('all')
     love.graphics.setColor(0, 1, 0)
     for ent, spatial in pairs(core.entity.componentTypes.Spatial:getAll()) do

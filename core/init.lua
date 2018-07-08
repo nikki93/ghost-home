@@ -34,8 +34,8 @@ require 'core.sprite'
 -- Default editor
 
 core.entity.new {
-    Edit = {},
-    EditTUI = {
+    Editor = {},
+    EditorTUI = {
         componentOrder = {
             'Default',
             'Spatial',
@@ -47,7 +47,7 @@ core.entity.new {
             ent = true,
         },
     },
-    EditSpatialBBoxes = {},
+    EditorSpatialBBoxes = {},
 }
 
 

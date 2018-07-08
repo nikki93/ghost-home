@@ -2,7 +2,7 @@
 -- Must be added to at most one entity--the editor itself. Makes sure that events the
 -- editing-related components subscribe to are only fired when edit mode is enabled.
 
-local Edit = core.entity.newComponentType('Edit', {
+local Editor = core.entity.newComponentType('Editor', {
     depends = { 'Input', 'Update', 'Visual' },
 })
 
@@ -10,9 +10,9 @@ local Edit = core.entity.newComponentType('Edit', {
 -- The singleton instance, if exists
 local singleton
 
-function Edit:add()
+function Editor:add()
     if singleton then
-        error("'Edit' component must be added to at most one entity -- the editor itself!")
+        error("'Editor' component must be added to at most one entity -- the editor itself!")
     end
     singleton = self
 
@@ -25,12 +25,12 @@ function Edit:add()
     self.selection = {} -- Selected entities as keys
 end
 
-function Edit:remove()
+function Editor:remove()
     singleton = nil
 end
 
 
-function Edit:update(...)
+function Editor:update(...)
     if not self.enabled then return end
 
     for dependent in pairs(self.__dependents) do
@@ -41,7 +41,7 @@ function Edit:update(...)
 end
 
 
-function Edit:draw(...)
+function Editor:draw(...)
     if not self.enabled then return end
 
     for dependent in pairs(self.__dependents) do
@@ -52,13 +52,13 @@ function Edit:draw(...)
 end
 
 
-function Edit:keypressed(key)
+function Editor:keypressed(key)
     if key == 'e' and (love.keyboard.isDown('lctrl') or love.keyboard.isDown('rctrl')) then
         self.enabled = not self.enabled
     end
 end
 
-function Edit:mousepressed(x, y, button)
+function Editor:mousepressed(x, y, button)
     if not tui.wantMouse() then
         -- TODO(nikki): Select by click
     end
