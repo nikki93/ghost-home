@@ -105,7 +105,7 @@ function entityMethods:addComponent(componentType)
 
     -- Already added?
     local key = componentType
-    if self[key] then return end
+    if self[key] then return self[key] end
 
     -- Add dependencies
     for _, dep in ipairs(info.depends) do
