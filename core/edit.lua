@@ -74,13 +74,13 @@ function Editor:keypressed(key)
     for _, mod in pairs(modifiers) do
         if love.keyboard.isDown(mod) then
             if #binding > 0 then
-                binding = binding .. '-'
+                binding = binding .. '_'
             end
             binding = binding .. mod:gsub('^l', ''):gsub('^r', '') -- Remove 'l' or 'r' prefix
         end
     end
     if #binding > 0 then
-        binding = binding .. '-'
+        binding = binding .. '_'
     end
     binding = binding .. key
 

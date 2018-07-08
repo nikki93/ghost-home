@@ -38,7 +38,7 @@ core.entity.new {
         enabled = false, -- Whether editing is initially enabled
         mode = 'normal', -- Initial mode
         bindings = {
-            mainToggle = 'ctrl-e', -- Toggles whether editing is enabled
+            mainToggle = 'ctrl_e', -- Toggles whether editing is enabled
             normal = {
             }
         }
