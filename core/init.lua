@@ -34,7 +34,15 @@ require 'core.sprite'
 -- Default editor
 
 core.entity.new {
-    Editor = {},
+    Editor = {
+        enabled = false, -- Whether editing is initially enabled
+        mode = 'normal', -- Initial mode
+        bindings = {
+            mainToggle = 'ctrl-e', -- Toggles whether editing is enabled
+            normal = {
+            }
+        }
+    },
     EditorTUI = {
         componentOrder = {
             'Default',

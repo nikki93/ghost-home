@@ -23,6 +23,7 @@ function Editor:add()
     -- State
     self.enabled = false -- Whether we are in edit-mode
     self.selection = {} -- Selected entities as keys
+    self.bindings = {} -- By default there are no bindings
 end
 
 function Editor:remove()
@@ -52,9 +53,41 @@ function Editor:draw(...)
 end
 
 
+local modifiers = {
+    'numlock',
+    'capslock',
+    'scrolllock',
+    'rshift',
+    'lshift',
+    'rctrl',
+    'lctrl',
+    'ralt',
+    'lalt',
+    'rgui',
+    'lgui',
+    'mode',
+}
+
 function Editor:keypressed(key)
-    if key == 'e' and (love.keyboard.isDown('lctrl') or love.keyboard.isDown('rctrl')) then
+    -- Make the binding string
+    local binding = ''
+    for _, mod in pairs(modifiers) do
+        if love.keyboard.isDown(mod) then
+            if #binding > 0 then
+                binding = binding .. '-'
+            end
+            binding = binding .. mod:gsub('^l', ''):gsub('^r', '') -- Remove 'l' or 'r' prefix
+        end
+    end
+    if #binding > 0 then
+        binding = binding .. '-'
+    end
+    binding = binding .. key
+
+    -- Is this the main toggle binding?
+    if binding == self.bindings.mainToggle then
         self.enabled = not self.enabled
+        return
     end
 end
 
