@@ -22,9 +22,9 @@ function Editor:add()
 
     -- State
     self.enabled = false -- Whether we are in edit-mode
-    self.selected = {} -- Selected entities as keys
-    self.bindings = {} -- By default there are no bindings
-    self.mode = 'default' -- Default starting mode
+    self.mode = 'default' -- Current mode
+    self.bindings = {} -- Table of mode -> binding -> mapping
+    self.selected = {} -- Currently selected entities as keys
 end
 
 function Editor:remove()
@@ -34,6 +34,13 @@ end
 
 function Editor:update(...)
     if not self.enabled then return end
+
+    -- Remove destroyed entities from `self.selected`
+    for ent in pairs(self.selected) do
+        if ent.destroyed then
+            self.selected[ent] = nil
+        end
+    end
 
     -- Forward to dependents
     for dependent in pairs(self.__dependents) do
