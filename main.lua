@@ -14,7 +14,7 @@ end
 
 
 local Rotating = core.entity.newComponentType('Rotating', {
-    depends = { 'Spatial', 'Update' },
+    depends = { 'Spatial', 'Update', 'Input' },
 })
 
 function Rotating:add()
@@ -31,13 +31,26 @@ function Rotating:update(dt)
     end
 end
 
+function Rotating:keypressed(key)
+    if key == 'up' then
+        if self.Spatial.position.y > 0.5 * love.graphics.getHeight() then
+            self.ent:removeComponent('Input', true)
+        end
+    end
+    if key == 'right' then
+        if self.Spatial.position.y > 0.5 * love.graphics.getHeight() then
+            self.ent:destroy()
+        end
+    end
+end
 
-for i = 1, 5 do
+
+for i = 1, 10 do
     core.entity.new {
         Sprite = {},
         RandomPosition = {},
         Rotating = {},
+        Input = { enabled = true },
     }
 end
-
 
