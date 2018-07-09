@@ -64,7 +64,7 @@ end
 
 -- `core.color` -- color picker
 propEditors[getmetatable(core.color(0, 0, 0, 0))] = function(value)
-    local r, g, b, a, changed = tui.colorEditor4('',
+    local r, g, b, a, changed = tui.colorEdit4('',
         value.r, value.g, value.b, value.a, {
             AlphaBar = true,
             Float = true,
@@ -141,7 +141,7 @@ end
 function EditorTUI:update(dt)
     tui.inWindow('editor', function()
         tui.inChild('selected', function()
-            for ent in pairs(self.Editor.selection) do
+            for ent in pairs(self.Editor.selected) do
                 self:editEntity(ent)
             end
         end)

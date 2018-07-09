@@ -18,8 +18,8 @@ end
 core.uuid = require 'https://raw.githubusercontent.com/thibaultcha/lua-resty-jit-uuid/0.0.7/lib/resty/jit-uuid.lua'
 
 require 'core.entity'
-require 'core.edit'
-require 'core.edit_tui'
+require 'core.editor'
+require 'core.editor_tui'
 
 require 'core.default'
 require 'core.update'
@@ -36,12 +36,13 @@ require 'core.sprite'
 core.entity.new {
     Editor = {
         enabled = false, -- Whether editing is initially enabled
-        mode = 'normal', -- Initial mode
+        mode = 'default', -- Initial mode
         bindings = {
             mainToggle = 'ctrl_e', -- Toggles whether editing is enabled
-            normal = {
-            }
-        }
+            default = {
+                mouse1 = 'EditorSpatialSelect.selectSingle',
+            },
+        },
     },
     EditorTUI = {
         componentOrder = {
@@ -56,6 +57,7 @@ core.entity.new {
         },
     },
     EditorSpatialBBoxes = {},
+    EditorSpatialSelect = {},
 }
 
 
