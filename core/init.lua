@@ -45,14 +45,14 @@ core.entity.new {
         },
     },
     EditorTUI = {
-        componentOrder = {
+        componentOrder = { -- Show these components before other ones, in this order
             'Default',
             'Spatial',
             'Visual',
             'Update',
             'Sprite',
         },
-        hiddenProps = {
+        hiddenProps = { -- Hide these properties across all components
             ent = true,
         },
     },
