@@ -5,6 +5,11 @@ local EditorTUI = core.entity.newComponentType('EditorTUI', {
     depends = { 'Editor' },
 })
 
+function EditorTUI:add()
+    self.componentOrder = {}
+    self.hiddenProps = {}
+end
+
 
 -- TUI text followed by a 'tab' for aligning tabular data
 local tabWidth = 8
