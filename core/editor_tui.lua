@@ -97,7 +97,15 @@ end
 -- TUI block for component with name `key` in entity `ent`
 function EditorTUI:editComponent(ent, key)
     local comp = ent[key]
-    for propName, value in pairs(comp) do -- Iterate through properties in the component
+
+    -- Collect prop names
+    local propNames = {}
+    for propName in pairs(comp) do propNames[propName] = true end
+    if comp.__info.props then
+        for propName in pairs(comp.__info.props) do propNames[propName] = true end
+    end
+
+    for propName in pairs(propNames) do
         -- Check if hidden prop
         local hidden = self.hiddenProps[propName] -- Known common hidden props
                 or core.entity.componentTypes[propName] -- Component dependency shortcut
@@ -110,7 +118,7 @@ function EditorTUI:editComponent(ent, key)
                 tui.sameLine()
 
                 -- Editor for property value
-                propEditor(comp, propName, value)
+                propEditor(comp, propName, comp[propName])
             end)
         end
     end
