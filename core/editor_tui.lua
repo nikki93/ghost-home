@@ -145,9 +145,38 @@ end
 
 function EditorTUI:update(dt)
     tui.inWindow('editor', function()
+        tui.inChildResizable('entities', function()
+            -- List of all entities
+            local selected = self.Editor.selected
+            for ent, default in pairs(core.entity.componentTypes.Default:getAll()) do
+                -- Highlight if already selected
+                if tui.selectable(default.id, selected[ent]) then
+                    -- Toggle on click
+                    if selected[ent] then
+                        selected[ent] = nil
+                    else
+                        selected[ent] = true
+                    end
+                end
+            end
+        end)
+
         tui.inChild('selected', function()
-            for ent in pairs(self.Editor.selected) do
-                self:editEntity(ent)
+            local first = next(self.Editor.selected)
+            if first then
+                if not next(self.Editor.selected, first) then
+                    -- Single entity selected, just show an editor for that
+                    self:editEntity(first)
+                else
+                    -- Multiple entities selected, show multiple sections
+                    for ent in pairs(self.Editor.selected) do
+                        if tui.collapsingHeader(ent.Default.id) then
+                            tui.inChildResizable(ent.Default.id, function()
+                                self:editEntity(ent)
+                            end)
+                        end
+                    end
+                end
             end
         end)
     end)
