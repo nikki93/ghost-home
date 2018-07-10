@@ -1,4 +1,11 @@
-local Visual = core.entity.newComponentType('Visual')
+local Visual = core.entity.newComponentType('Visual', {
+    props = {
+        depth = {
+            set = 'setDepth',
+            get = 'getDepth',
+        },
+    },
+})
 
 
 -- Order to draw `Visual` instances in as an array -- `orderDirty` is whether it needs an update

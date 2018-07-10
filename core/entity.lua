@@ -4,6 +4,49 @@ core.entity = {}
 -- Common methods for all component instances, of any type
 local baseComponentMethods = {}
 
+-- Called when a key isn't found in the component
+local function componentMetaIndex(t, k)
+    -- Found a method?
+    local method = t.__info.methods[k]
+    if method then return method end
+
+    -- Has a getter?
+    local propMetas = t.__info.props
+    if propMetas then
+        local propMeta = propMetas[k]
+        if propMeta then
+            local getter = propMeta.get
+            if getter then
+                return t[getter](t)
+            end
+        end
+    end
+end
+
+-- Called when setting a new key on a component
+local function componentMetaNewindex(t, k, v)
+    -- Has a setter?
+    local propMetas = t.__info.props
+    if propMetas then
+        local propMeta = propMetas[k]
+        if propMeta then
+            local setter = propMeta.set
+            if setter then
+                return t[setter](t, v)
+            end
+        end
+    end
+
+    -- Default behavior
+    return rawset(t, k, v)
+end
+
+-- The metatable for all component instances
+local componentMeta = {
+    __index = componentMetaIndex,
+    __newindex = componentMetaNewindex,
+}
+
 -- Metadata abpout each component type, keyed by component type name. See `entity.newComponentType`
 -- below for format.
 local componentInfos = {}
@@ -17,9 +60,9 @@ function core.entity.newComponentType(name, opts)
     end
     opts = opts or {}
 
-    local info = {}
+    local info = opts
 
-    -- Initialize `depends` table
+    -- Normalize `depends` table into array of string names
     info.depends = opts.depends
     if info.depends == nil then
         info.depends = {}
@@ -114,10 +157,9 @@ function entityMethods:addComponent(componentType)
 
     -- Create and add to entity
     local component = setmetatable({
-        __dependents = {}
-    }, {
-        __index = info.methods,
-    })
+        __info = info,
+        __dependents = {},
+    }, componentMeta)
     rawset(self, key, component)
 
     -- Add to `entities` index
