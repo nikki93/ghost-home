@@ -1,5 +1,5 @@
 -- `Editor` extension that shows a TUI window allowing launching editor functionality, and shows
--- TUIs for selected entities with their components and properties.
+-- TUIs for selected entities with their components and props.
 
 local EditorTUI = core.entity.newComponentType('EditorTUI', {
     depends = { 'Editor' },
@@ -19,7 +19,7 @@ local function tabbedText(text)
     tui.text((' '):rep(tabWidth * math.ceil(#text / tabWidth) - #text))
 end
 
--- Table of types to functions for a TUI for that type of property
+-- Table of types to functions for a TUI for that type of prop
 local propEditors = {}
 
 -- Basic boolean: checkbox
@@ -79,7 +79,7 @@ propEditors[getmetatable(core.color(0, 0, 0, 0))] = function(value)
     return core.color(r, g, b, a), true
 end
 
--- Common property value editor entrypoint -- dispatches to one of the above based on type
+-- Common prop value editor entrypoint -- dispatches to one of the above based on type
 local function propEditor(comp, propName, value)
     local propEditor = propEditors[getmetatable(value)] or propEditors[type(value)]
     if propEditor then
@@ -112,12 +112,12 @@ function EditorTUI:editComponent(ent, key)
                 or propName:match('^_') -- Starts with '_'
         if not hidden then
             tui.withID(propName, function()
-                -- Label for property name
+                -- Label for prop name
                 tui.alignTextToFramePadding()
                 tabbedText(propName)
                 tui.sameLine()
 
-                -- Editor for property value
+                -- Editor for prop value
                 propEditor(comp, propName, comp[propName])
             end)
         end

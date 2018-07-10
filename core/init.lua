@@ -52,7 +52,7 @@ core.entity.new {
             'Update',
             'Sprite',
         },
-        hiddenProps = { -- Hide these properties across all components
+        hiddenProps = { -- Hide these props across all components
             ent = true,
         },
     },
