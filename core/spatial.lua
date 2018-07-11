@@ -15,8 +15,8 @@ end
 -- Return whether the bounding box intersects `point` given in world space
 function Spatial:intersectsPoint(point)
     local localPoint = self:toLocalSpace(point)
-    local halfSize = self.size / 2
-    return math.abs(localPoint.x) < halfSize.x and math.abs(localPoint.y) < halfSize.y
+    return math.abs(localPoint.x) < self.size.x / 2
+            and math.abs(localPoint.y) < self.size.y / 2
 end
 
 
