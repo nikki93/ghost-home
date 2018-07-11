@@ -12,12 +12,14 @@ function Profiler:add()
 end
 
 function Profiler:draw()
+    self.pie:detach()
     love.graphics.push('all')
     local w, h = love.graphics.getDimensions()
     love.graphics.setColor(0, 0, 0, 0.5)
     love.graphics.rectangle('fill', 0, 0, w, h)
     love.graphics.pop()
     self.pie:draw()
+    self.pie:attach()
 end
 
 function Profiler:keypressed(...)
@@ -26,6 +28,16 @@ end
 
 function Profiler:mousepressed(...)
     self.pie:mousepressed(...)
+end
+
+function Profiler:attach(foo)
+    local ent = next(core.entity.componentTypes.Profiler:getAll())
+    if ent then ent.Profiler.pie:attach() end
+end
+
+function Profiler:detach(foo)
+    local ent = next(core.entity.componentTypes.Profiler:getAll())
+    if ent then ent.Profiler.pie:detach() end
 end
 
 
