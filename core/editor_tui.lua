@@ -19,7 +19,8 @@ local function tabbedText(text)
     tui.text((' '):rep(tabWidth * math.ceil(#text / tabWidth) - #text))
 end
 
--- Table of types to functions for a TUI for that type of prop
+-- Table of types to functions for a TUI for that type of prop. Each TUI function takes the current
+-- value, and returns the new value and `true` if changed, or anything and `false` if unchanged.
 local propEditors = {}
 
 -- Basic boolean: checkbox
@@ -59,24 +60,64 @@ function propEditors.string(value)
     end
 end
 
--- `core.vec2` -- two-field input for 2d vector
-propEditors[getmetatable(core.vec2(0, 0))] = function(value)
-    local x, y, changed = tui.inputFloat2('', value.x, value.y,
-        { extraFlags = { EnterReturnsTrue = true } })
-    if not changed then return nil, false end
-    return core.vec2(x, y), true
-end
+-- Table of shape and TUI functions for that shape -- is an array because it picks the first one
+-- that matches in the order, in case multiple match
+local tableEditors = {}
 
--- `core.color` -- color picker
-propEditors[getmetatable(core.color(0, 0, 0, 0))] = function(value)
-    local r, g, b, a, changed = tui.colorEdit4('',
-        value.r, value.g, value.b, value.a, {
-            AlphaBar = true,
-            Float = true,
-            PickerHueWheel = true,
-        })
-    if not changed then return nil, false end
-    return core.color(r, g, b, a), true
+-- Editor for 'xy' tables
+table.insert(tableEditors, {
+    match = core.types.shape({
+        x = core.types.number,
+        y = core.types.number,
+    }),
+    editor = function(value)
+        local changed
+        value.x, value.y, changed = tui.inputFloat2('', value.x, value.y,
+            { extraFlags = { EnterReturnsTrue = true } })
+        return value, changed
+    end,
+})
+
+-- Editor for 'rgb[a]' tables
+table.insert(tableEditors, {
+    match = core.types.shape({
+        r = core.types.number,
+        g = core.types.number,
+        b = core.types.number,
+        a = core.types.number:is_optional(),
+    }),
+    editor = function(value)
+        local changed
+        if value.a then -- Has alpha?
+            value.r, value.g, value.b, value.a, changed = tui.colorEdit4('',
+                value.r, value.g, value.b, value.a, {
+                    AlphaBar = true,
+                    Float = true,
+                    PickerHueWheel = true,
+                })
+        else
+            value.r, value.g, value.b, changed = tui.colorEdit3('',
+                value.r, value.g, value.b, {
+                    Float = true,
+                    PickerHueWheel = true,
+                })
+        end
+        return value, changed
+    end,
+})
+
+-- Table: choose from `tableEditors`
+function propEditors.table(value)
+    for _, entry in ipairs(tableEditors) do
+        if entry.match(value) then
+            return entry.editor(value)
+        end
+    end
+
+    -- Nothing matched
+    tui.alignTextToFramePadding()
+    tui.text('<unsupported>')
+    return nil, false
 end
 
 -- Common prop value editor entrypoint -- dispatches to one of the above based on type

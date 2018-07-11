@@ -1,22 +1,23 @@
 local Spatial = core.entity.newComponentType('Spatial')
 
 function Spatial:add()
-    self.position = core.vec2(0, 0)
-    self.size = core.vec2(32, 32)
+    self.position = { x = 0, y = 0 }
+    self.size = { x = 32, y = 32 }
     self.rotation = 0
 end
 
 
--- Transform `point` from world space to local space
-function Spatial:toLocalSpace(point)
-    return (point - self.position):rotate(-self.rotation)
+-- Return local space coordinates of a point given in world space
+function Spatial:toLocalSpace(x, y)
+    local dx, dy = x - self.position.x, y - self.position.y
+    return core.vec2.rotate(-self.rotation, dx, dy)
 end
 
--- Return whether the bounding box intersects `point` given in world space
-function Spatial:intersectsPoint(point)
-    local localPoint = self:toLocalSpace(point)
-    return math.abs(localPoint.x) < self.size.x / 2
-            and math.abs(localPoint.y) < self.size.y / 2
+-- Return whether the bounding box intersects a point given in world space
+function Spatial:intersectsPoint(x, y)
+    local lx, ly = self:toLocalSpace(x, y)
+    local hsx, hsy = self.size.x / 2, self.size.y / 2
+    return math.abs(lx) < hsx and math.abs(ly) < hsy
 end
 
 
@@ -43,8 +44,7 @@ function EditorSpatialBBoxes:drawOverlay()
         love.graphics.rotate(spatial.rotation)
 
         local size = spatial.size
-        local halfSize = spatial.size / 2
-        love.graphics.rectangle('line', -halfSize.x, -halfSize.y, size.x, size.y)
+        love.graphics.rectangle('line', -size.x / 2, -size.y / 2, size.x, size.y)
 
         love.graphics.pop()
     end
@@ -59,10 +59,9 @@ local EditorSpatialSelect = core.entity.newComponentType('EditorSpatialSelect', 
 })
 
 function EditorSpatialSelect:selectSingle(x, y)
-    local point = core.vec2(x, y)
     local selected
     for ent, spatial in pairs(core.entity.componentTypes.Spatial:getAll()) do
-        if spatial:intersectsPoint(point) then
+        if spatial:intersectsPoint(x, y) then
             selected = ent
         end
     end

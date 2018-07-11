@@ -6,14 +6,13 @@ local defaultImage = love.graphics.newImage('assets/avatar2.png')
 
 function Sprite:add()
     self.image = defaultImage
-    self.color = core.color(1, 1, 1, 1)
+    self.color = { r = 1, g = 1, b = 1, a = 1 }
 end
 
 function Sprite:draw()
     local prevR, prevG, prevB, prevA = love.graphics.getColor()
     love.graphics.setColor(self.color.r, self.color.g, self.color.b, self.color.a)
 
-    -- Perf: prefer direct number math over vectors
     local spatial = self.Spatial
     local imgSizeX, imgSizeY = self.image:getDimensions()
     love.graphics.draw(self.image,

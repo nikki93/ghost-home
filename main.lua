@@ -6,7 +6,7 @@ local RandomPosition = core.entity.newComponentType('RandomPosition', {
 })
 
 function RandomPosition:add()
-    self.Spatial.position = core.vec2 {
+    self.Spatial.position = {
         x = math.random() * love.graphics.getWidth(),
         y = math.random() * love.graphics.getHeight(),
     }
@@ -23,29 +23,19 @@ end
 
 function Rotating:update(dt)
     self.Spatial.rotation = self.Spatial.rotation + self.rotationSpeed * dt
-
-    if love.keyboard.isDown('a') then
-        if self.Spatial.position.y > 0.5 * love.graphics.getHeight() then
-            self.ent:destroy()
-        end
-    end
 end
 
 function Rotating:keypressed(key)
-    if key == 'up' then
-        if self.Spatial.position.y > 0.5 * love.graphics.getHeight() then
-            self.ent:removeComponent('Input', true)
-        end
+    if key == 'left' then
+        self.ent:removeComponent('Input')
     end
     if key == 'right' then
-        if self.Spatial.position.y > 0.5 * love.graphics.getHeight() then
-            self.ent:destroy()
-        end
+        self.ent:removeComponent('Rotating')
     end
 end
 
 
-for i = 1, 10 do
+for i = 1, 5 do
     core.entity.new {
         Sprite = {},
         RandomPosition = {},

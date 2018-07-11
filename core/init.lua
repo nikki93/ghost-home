@@ -1,21 +1,14 @@
 core = {}
 
-do
-    jit.off() -- Use non-FFI versions of CPML
 
-    core.vec2 = require 'core.vec2'
-    core.color = require 'core.color'
-
-    -- Skip 3d math stuff for now
-    --core.vec3 = cpml.vec3
-    --core.quat = cpml.quat
-    --core.bound2 = cpml.bound2
-    --core.bound3 = cpml.bound3
-
-    pcall(function() jit.on() end) -- May be permanently disabled, protect the call
-end
+-- External libraries
 
 core.uuid = require 'https://raw.githubusercontent.com/thibaultcha/lua-resty-jit-uuid/0.0.7/lib/resty/jit-uuid.lua'
+core.types = (require 'https://raw.githubusercontent.com/leafo/tableshape/2187b5858a6441b83d895f3f4b65fb98575895e7/tableshape/init.lua').types
+core.vec2 = require 'https://raw.githubusercontent.com/vrld/hump/0bf301f7109c5029c54090bcfe76ff035b2961c0/vector-light.lua'
+
+
+-- Modules
 
 require 'core.entity'
 
