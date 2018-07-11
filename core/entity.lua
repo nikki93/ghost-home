@@ -73,7 +73,7 @@ function core.entity.newComponentType(name, opts)
     -- Initialize `methods` table
     info.methods = setmetatable({
         __typeName = name,
-        __info = info,
+        __info = info, -- Allow 'static' methods to access `info` easily
     }, { __index = baseComponentMethods })
 
     -- Initialize `entities` index
@@ -157,7 +157,7 @@ function entityMethods:addComponent(componentType)
 
     -- Create and add to entity
     local component = setmetatable({
-        __info = info,
+        __info = info, -- `componentMeta` refers to `t.__info` in `__index`, so set it here
         __dependents = {},
     }, componentMeta)
     rawset(self, key, component)
