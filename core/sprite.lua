@@ -10,8 +10,11 @@ function Sprite:add()
 end
 
 function Sprite:draw()
+    -- Don't `.setColor` unnecessarily
     local prevR, prevG, prevB, prevA = love.graphics.getColor()
-    love.graphics.setColor(self.color.r, self.color.g, self.color.b, self.color.a)
+    local r, g, b, a = self.color.r, self.color.g, self.color.b, self.color.a
+    local changeColor = prevR ~= r or prevG ~= g or prevB ~= b or prevA ~= a
+    if changeColor then love.graphics.setColor(r, g, b, a) end
 
     local spatial = self.Spatial
     local imgSizeX, imgSizeY = self.image:getDimensions()
@@ -21,5 +24,5 @@ function Sprite:draw()
         spatial.size.x / imgSizeX, spatial.size.y / imgSizeY,
         imgSizeX / 2, imgSizeY / 2)
 
-    love.graphics.setColor(prevR, prevG, prevB, prevA)
+    if changeColor then love.graphics.setColor(prevR, prevG, prevB, prevA) end
 end
