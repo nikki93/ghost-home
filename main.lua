@@ -34,8 +34,7 @@ function Rotating:keypressed(key)
     end
 end
 
-
-for i = 1, 5 do
+for i = 1, 1000 do
     core.entity.new {
         Sprite = {},
         RandomPosition = {},
@@ -44,3 +43,6 @@ for i = 1, 5 do
     }
 end
 
+--core.entity.new {
+--    Profiler = {},
+--}
