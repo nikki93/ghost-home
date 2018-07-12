@@ -57,7 +57,7 @@ core.entity.new {
 }
 
 
--- Default events
+-- Default Love callbacks
 
 function love.update(dt)
     core.entity.componentTypes.Update:updateAll(dt)
@@ -65,6 +65,12 @@ end
 
 function love.draw()
     core.entity.componentTypes.Visual:drawAll()
+end
+
+for cb in pairs(core.entity.componentTypes.Input.callbackNames) do
+    love[cb] = function(...)
+        core.entity.componentTypes.Input[cb .. 'All'](core.entity.componentTypes.Input, ...)
+    end
 end
 
 

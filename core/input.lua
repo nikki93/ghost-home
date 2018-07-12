@@ -2,7 +2,7 @@ local Input = core.entity.newComponentType('Input')
 
 
 -- Names of Love callbacks that are input-related
-local inputCallbacks = {
+Input.callbackNames = {
     --    directorydropped = true,
     --    draw = true,
     --    errhand = true,
@@ -39,10 +39,10 @@ local inputCallbacks = {
     joystickremoved = true,
 }
 
--- `listeners[cbName][comp] == true` iff. component instance `comp` has a method for callback
+-- `listeners[cb][comp] == true` iff. component instance `comp` has a method for callback
 -- `cb` and depends on `Input`
 local listeners = {}
-for cb in pairs(inputCallbacks) do -- Initialize to empty for every callback
+for cb in pairs(Input.callbackNames) do -- Initialize to empty for every callback
     listeners[cb] = {}
 end
 
@@ -56,7 +56,7 @@ end
 
 function Input:addDependent(dependentType)
     local dependent = self.ent[dependentType]
-    for cb in pairs(inputCallbacks) do
+    for cb in pairs(Input.callbackNames) do
         if dependent[cb] then
             listeners[cb][dependent] = true
         end
@@ -65,7 +65,7 @@ end
 
 function Input:removeDependent(dependentType)
     local dependent = self.ent[dependentType]
-    for cb in pairs(inputCallbacks) do
+    for cb in pairs(Input.callbackNames) do
         -- We do this for all callbacks, not just the ones it has a method for, just to be sure
         -- (eg. maybe a method got unset for whatever reason)
         listeners[cb][dependent] = nil
@@ -73,10 +73,9 @@ function Input:removeDependent(dependentType)
 end
 
 
--- Notify all listeners on each Love input callback
-
-for cb in pairs(inputCallbacks) do
-    love[cb] = function(...)
+-- Makes 'static' methods `keypressedAll`, `mousepressedAll`, etc.
+for cb in pairs(Input.callbackNames) do
+    Input[cb .. 'All'] = function(self, ...)
         for listener in pairs(listeners[cb]) do
             if listener.Input.enabled then
                 listener[cb](listener, ...)
