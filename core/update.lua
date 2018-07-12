@@ -1,8 +1,7 @@
 local Update = core.entity.newComponentType('Update')
 
 
--- Update all updatable components on `love.update`
-function love.update(dt)
+function Update:updateAll(dt)
     for _, instance in pairs(Update:getAll()) do
         for dependent in pairs(instance.__dependents) do
             dependent:update(dt)

@@ -46,8 +46,7 @@ function Visual:getDepth()
 end
 
 
--- Draw all visual components on `love.draw`
-function love.draw()
+function Visual:drawAll()
     ensureOrder()
     for _, instance in ipairs(order) do
         for dependent in pairs(instance.__dependents) do

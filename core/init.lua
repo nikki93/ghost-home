@@ -57,4 +57,15 @@ core.entity.new {
 }
 
 
+-- Default events
+
+function love.update(dt)
+    core.entity.componentTypes.Update:updateAll(dt)
+end
+
+function love.draw()
+    core.entity.componentTypes.Visual:drawAll()
+end
+
+
 return core
