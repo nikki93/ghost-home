@@ -59,15 +59,37 @@ local EditorSpatialSelect = core.entity.newComponentType('EditorSpatialSelect', 
 })
 
 function EditorSpatialSelect:selectSingle(x, y)
-    local selected
+    -- Find all intersecting `Spatial`s
+    local intersecting = {}
     for ent, spatial in pairs(core.entity.componentTypes.Spatial:getAll()) do
         if spatial:intersectsPoint(x, y) then
-            selected = ent
+            table.insert(intersecting, ent)
         end
     end
-    if selected ~= nil then
-        self.Editor.selected[selected] = true
-    else
+
+    -- Empty?
+    if not next(intersecting) then
         self.Editor.selected = {}
+        return
     end
+
+    -- Sort by `.Spatial.position.x`, break ties by `.Default.id`
+    table.sort(intersecting, function(a, b)
+        if a.Spatial.position.x ~= b.Spatial.position.x then
+            return a.Spatial.position.x < b.Spatial.position.x
+        end
+        return a.Default.id < b.Default.id
+    end)
+
+    -- If one of them was previously selected, select the next thing
+    table.insert(intersecting, intersecting[1]) -- Duplicate first at end to wrap
+    for i = 1, #intersecting - 1 do
+        if self.Editor.selected[intersecting[i]] then -- Found a selected one? Select next.
+            self.Editor.selected = { [intersecting[i + 1]] = true }
+            return
+        end
+    end
+
+    -- Else just select first
+    self.Editor.selected = { [intersecting[1]] = true }
 end
