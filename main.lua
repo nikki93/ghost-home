@@ -7,8 +7,8 @@ local RandomPosition = core.entity.newComponentType('RandomPosition', {
 
 function RandomPosition:add()
     self.Spatial.position = {
-        x = math.random() * love.graphics.getWidth(),
-        y = math.random() * love.graphics.getHeight(),
+        x = (math.random() - 0.5) * love.graphics.getWidth(),
+        y = (math.random() - 0.5) * love.graphics.getHeight(),
     }
 end
 
