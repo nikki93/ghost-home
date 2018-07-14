@@ -24,7 +24,15 @@ require 'core.visual'
 
 require 'core.profiler'
 
+require 'core.view'
 require 'core.sprite'
+
+
+-- Default view
+
+local defaultView = core.entity.new {
+    View = {},
+}
 
 
 -- Default editor
@@ -64,7 +72,7 @@ function love.update(dt)
 end
 
 function love.draw()
-    core.entity.componentTypes.Visual:drawAll()
+    core.entity.componentTypes.Visual:drawAll({ view = defaultView })
 end
 
 for cb in pairs(core.entity.componentTypes.Input.callbackNames) do

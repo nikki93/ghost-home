@@ -46,11 +46,22 @@ function Visual:getDepth()
 end
 
 
-function Visual:drawAll()
+function Visual:drawAll(opts)
+    opts = opts or {}
+
     ensureOrder()
+
+    love.graphics.push('all')
+
+    if opts.view then
+        opts.view.View:apply()
+    end
+
     for _, instance in ipairs(order) do
         for dependent in pairs(instance.__dependents) do
             dependent:draw()
         end
     end
+
+    love.graphics.pop()
 end
