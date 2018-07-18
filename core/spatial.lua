@@ -59,6 +59,12 @@ local EditorSpatialSelect = core.entity.newComponentType('EditorSpatialSelect', 
 })
 
 function EditorSpatialSelect:selectSingle(x, y)
+    -- Apply `View` transform
+    local view = self.Editor.view
+    if view then
+        x, y = view.View:toWorldSpace(x, y)
+    end
+
     -- Find all intersecting `Spatial`s
     local intersecting = {}
     for ent, spatial in pairs(core.entity.componentTypes.Spatial:getAll()) do

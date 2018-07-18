@@ -5,6 +5,8 @@ local View = core.entity.newComponentType('View', {
 function View:add()
     self.Spatial.size.y = love.graphics.getHeight()
     self.autoAspect = true
+
+    -- Store a single `._transform` object so we don't keep allocating and GC'ing new ones
     self._transform = love.math.newTransform()
 end
 
@@ -38,4 +40,9 @@ function View:apply()
 
     self:_updateTransform()
     love.graphics.replaceTransform(self._transform:inverse())
+end
+
+function View:toWorldSpace(x, y)
+    self:_updateTransform()
+    return self._transform:transformPoint(x, y)
 end

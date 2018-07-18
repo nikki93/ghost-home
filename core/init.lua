@@ -40,6 +40,7 @@ local defaultView = core.entity.new {
 core.entity.new {
     Editor = {
         enabled = false, -- Whether editing is initially enabled
+        view = defaultView, -- `View` to render from while editing
         mode = 'default', -- Initial mode
         bindings = {
             mainToggle = 'ctrl_e', -- Toggles whether editing is enabled
