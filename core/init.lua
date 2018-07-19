@@ -34,13 +34,17 @@ local defaultView = core.entity.new {
     View = {},
 }
 
+local editorView = core.entity.new {
+    View = {},
+}
+editorView.Spatial.size.y = 1.2 * editorView.Spatial.size.y
 
 -- Default editor
 
-core.entity.new {
+local editor = core.entity.new {
     Editor = {
         enabled = false, -- Whether editing is initially enabled
-        view = defaultView, -- `View` to render from while editing
+        view = editorView, -- `View` to render from while editing
         mode = 'default', -- Initial mode
         bindings = {
             mainToggle = 'ctrl_e', -- Toggles whether editing is enabled
@@ -73,7 +77,8 @@ function love.update(dt)
 end
 
 function love.draw()
-    core.entity.componentTypes.Visual:drawAll({ view = defaultView })
+    local view = editor.Editor.enabled and editorView or defaultView
+    core.entity.componentTypes.Visual:drawAll({ view = view })
 end
 
 for cb in pairs(core.entity.componentTypes.Input.callbackNames) do
