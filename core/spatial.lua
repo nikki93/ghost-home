@@ -68,7 +68,7 @@ function EditorSpatialSelect:selectSingle(x, y)
     -- Find all intersecting `Spatial`s
     local intersecting = {}
     for ent, spatial in pairs(core.entity.componentTypes.Spatial:getAll()) do
-        if spatial:intersectsPoint(x, y) then
+        if not ent.Default.hidden and spatial:intersectsPoint(x, y) then
             table.insert(intersecting, ent)
         end
     end

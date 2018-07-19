@@ -198,13 +198,15 @@ function EditorTUI:update(dt)
             -- List of all entities
             local selected = self.Editor.selected
             for ent, default in pairs(core.entity.componentTypes.Default:getAll()) do
-                -- Highlight if already selected
-                if tui.selectable(default.id, selected[ent]) then
-                    -- Toggle on click
-                    if selected[ent] then
-                        selected[ent] = nil
-                    else
-                        selected[ent] = true
+                if not ent.Default.hidden then
+                    -- Highlight if already selected
+                    if tui.selectable(default.id, selected[ent]) then
+                        -- Toggle on click
+                        if selected[ent] then
+                            selected[ent] = nil
+                        else
+                            selected[ent] = true
+                        end
                     end
                 end
             end

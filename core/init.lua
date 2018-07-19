@@ -35,6 +35,7 @@ local defaultView = core.entity.new {
 }
 
 local editorView = core.entity.new {
+    Default = { hidden = true },
     View = {},
 }
 editorView.Spatial.size.y = 1.2 * editorView.Spatial.size.y
@@ -42,6 +43,7 @@ editorView.Spatial.size.y = 1.2 * editorView.Spatial.size.y
 -- Default editor
 
 local editor = core.entity.new {
+    Default = { hidden = true },
     Editor = {
         enabled = false, -- Whether editing is initially enabled
         view = editorView, -- `View` to render from while editing

@@ -96,52 +96,71 @@ local function genBinding(suffix)
     return prefix .. suffix
 end
 
--- Execute the mapping for `binding`, passing it the extra parameters given. Returns whether a
--- mapping was found.
+-- Execute the mapping for `binding`, passing it the extra parameters given.
 function Editor:executeBinding(binding, ...)
-    -- Find the mapping
-    local modeMappings = self.bindings[self.mode]
-    if not modeMappings then return false end
-    local mapping = modeMappings[binding]
-
-    -- Split the '<component>.<member>' format
-    if not mapping then return false end
-    local componentName = mapping:match('^[^.]*')
-    local memberName = mapping:match('[^.]*$')
-
-    -- Find the component instance and the member, then execute it
-    local component = self.ent[componentName]
-    if not component then return false end
-    local member = component[memberName]
-    if not member then return false end
-    member(component, ...)
-end
-
-function Editor:keypressed(key, scancode, isrepeat)
-    if tui.wantKeyboard() then return end -- TUI has hold of keyboard?
-    if isrepeat then return end -- Repeat keypress? (while key is held down)
-
-    local binding = genBinding(key)
-
     -- Special case: Is this the main toggle binding? If so, toggle and abort.
     if binding == self.bindings.mainToggle then
         self.enabled = not self.enabled
         return
     end
 
-    if not self.enabled then return end -- Editor disabled?
+    -- Editor disabled?
+    if not self.enabled then return end
 
-    self:executeBinding(binding, key, scancode, isrepeat)
+    -- Find the mapping
+    local modeMappings = self.bindings[self.mode]
+    if not modeMappings then return end
+    local mapping = modeMappings[binding]
+
+    -- Split the '<component>.<member>' format
+    if not mapping then return end
+    local componentName = mapping:match('^[^.]*')
+    local memberName = mapping:match('[^.]*$')
+
+    -- Find the component instance and the member, then execute it
+    local component = self.ent[componentName]
+    if not component then
+        error("component '" .. componentName .. "' not found for editor binding '" ..
+                binding .. "'")
+    end
+    local member = component[memberName]
+    if not component then
+        error("'" .. componentName "' doesn't have a member '" .. member .. "' for editor " ..
+                "binding '" .. binding .. "'")
+    end
+    member(component, ...)
 end
 
-function Editor:mousepressed(x, y, button, istouch)
+-- Execute a key binding with the given suffix for Love callback parameters -- skipping if the
+-- editor doesn't have keyboard focus
+function Editor:executeKeyBinding(suffix, key, scancode, isrepeat)
+    if tui.wantKeyboard() then return end -- TUI has hold of keyboard?
+    if isrepeat then return end -- Repeat keypress? (while key is held down)
+    self:executeBinding(genBinding(key) .. suffix, key, scancode, isrepeat)
+end
+
+-- Execute a mouse binding with the given suffix for Love callback parameters -- skipping if the
+-- editor doesn't have mouse focus
+function Editor:executeMouseBinding(suffix, x, y, button, istouch)
     if tui.wantMouse() then return end -- TUI has hold of mouse?
-
-    local binding = genBinding('mouse' .. tostring(button))
-
-    if not self.enabled then return end -- Editor disabled?
-
-    self:executeBinding(binding, x, y, button, istouch)
+    self:executeBinding(genBinding('mouse' .. tostring(button)) .. suffix, x, y, button, istouch)
 end
 
+function Editor:keypressed(...)
+    self:executeKeyBinding('_pressed', ...)
+    self:executeKeyBinding('', ...)
+end
+
+function Editor:keyreleased(...)
+    self:executeKeyBinding('_released', ...)
+end
+
+function Editor:mousepressed(...)
+    self:executeMouseBinding('_pressed', ...)
+    self:executeMouseBinding('', ...)
+end
+
+function Editor:mousereleased(...)
+    self:executeMouseBinding('_released', ...)
+end
 
