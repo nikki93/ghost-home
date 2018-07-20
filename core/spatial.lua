@@ -29,24 +29,33 @@ local EditorSpatialBBoxes = core.entity.newComponentType('EditorSpatialBBoxes', 
 
 function EditorSpatialBBoxes:drawOverlay()
     love.graphics.push('all')
+
+    -- Scale line width so lines look 1 pixel wide always
+    local px, py = love.graphics.transformPoint(0, 0)
+    local qx, qy = love.graphics.transformPoint(1, 0)
+    local scale = core.vec2.len(px - qx, py - qy)
+    love.graphics.setLineWidth(1 / scale)
+
     for ent, spatial in pairs(core.entity.componentTypes.Spatial:getAll()) do
-        love.graphics.push()
+        if not ent.Default.hidden then
+            love.graphics.push()
 
-        if self.Editor.selected[ent] then
-            love.graphics.setColor(1, 0, 0)
-        else
-            love.graphics.setColor(0, 1, 0)
+            if self.Editor.selected[ent] then
+                love.graphics.setColor(1, 0, 0)
+            else
+                love.graphics.setColor(0, 1, 0)
+            end
+
+            local position = spatial.position
+            love.graphics.translate(position.x, position.y)
+
+            love.graphics.rotate(spatial.rotation)
+
+            local size = spatial.size
+            love.graphics.rectangle('line', -size.x / 2, -size.y / 2, size.x, size.y)
+
+            love.graphics.pop()
         end
-
-        local position = spatial.position
-        love.graphics.translate(position.x, position.y)
-
-        love.graphics.rotate(spatial.rotation)
-
-        local size = spatial.size
-        love.graphics.rectangle('line', -size.x / 2, -size.y / 2, size.x, size.y)
-
-        love.graphics.pop()
     end
     love.graphics.pop()
 end
