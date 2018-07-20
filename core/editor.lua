@@ -164,3 +164,14 @@ function Editor:mousereleased(...)
     self:executeMouseBinding('_released', ...)
 end
 
+function Editor:mousemoved(...)
+    if not self.enabled then return end
+
+    -- Forward to dependents
+    for dependent in pairs(self.__dependents) do
+        if dependent.mousemoved then
+            dependent:mousemoved(...)
+        end
+    end
+end
+

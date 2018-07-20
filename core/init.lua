@@ -52,6 +52,9 @@ local editor = core.entity.new {
             mainToggle = 'ctrl_e', -- Toggles whether editing is enabled
             default = {
                 mouse1 = 'EditorSpatialSelect.selectSingle',
+                shift_mouse1_pressed = 'EditorViewPan.panStart',
+                shift_mouse1_released = 'EditorViewPan.panEnd',
+                mouse1_released = 'EditorViewPan.panEnd',
             },
         },
     },
@@ -69,6 +72,7 @@ local editor = core.entity.new {
     },
     EditorSpatialBBoxes = {},
     EditorSpatialSelect = {},
+    EditorViewPan = {},
 }
 
 

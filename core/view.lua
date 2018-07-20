@@ -46,3 +46,35 @@ function View:toWorldSpace(x, y)
     self:_updateTransform()
     return self._transform:transformPoint(x, y)
 end
+
+
+-- `Editor` extension for panning / zooming the editor `View`
+
+local EditorViewPan = core.entity.newComponentType('EditorViewPan', {
+    depends = { 'Editor' },
+})
+
+function EditorViewPan:add()
+    self.panning = false
+end
+
+function EditorViewPan:mousemoved(x, y, dx, dy)
+    if self.panning then
+        -- Compute the delta in the world position pointed at by the mouse
+        local view = self.Editor.view
+        local worldX, worldY = view.View:toWorldSpace(x, y)
+        local prevWorldX, prevWorldY = view.View:toWorldSpace(x - dx, y - dy)
+        view.Spatial.position = {
+            x = view.Spatial.position.x - (worldX - prevWorldX),
+            y = view.Spatial.position.y - (worldY - prevWorldY),
+        }
+    end
+end
+
+function EditorViewPan:panStart(x, y)
+    self.panning = true
+end
+
+function EditorViewPan:panEnd()
+    self.panning = false
+end
