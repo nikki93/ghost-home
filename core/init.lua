@@ -55,6 +55,7 @@ local editor = core.entity.new {
                 shift_mouse1_pressed = 'EditorViewPan.panStart',
                 shift_mouse1_released = 'EditorViewPan.panEnd',
                 mouse1_released = 'EditorViewPan.panEnd',
+                shift_wheelmoved = 'EditorViewPan.zoom'
             },
         },
     },

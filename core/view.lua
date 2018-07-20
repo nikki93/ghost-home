@@ -56,6 +56,8 @@ local EditorViewPan = core.entity.newComponentType('EditorViewPan', {
 
 function EditorViewPan:add()
     self.panning = false
+    self.zoomLevel = 0
+    self.zoomBase = 0
 end
 
 function EditorViewPan:mousemoved(x, y, dx, dy)
@@ -77,4 +79,17 @@ end
 
 function EditorViewPan:panEnd()
     self.panning = false
+end
+
+function EditorViewPan:zoom(x, y)
+    local view = self.Editor.view
+
+    -- No base height yet? Initialize
+    if self.zoomBase == nil or self.zoomBase == 0 then
+        self.zoomBase = view.Spatial.size.y
+        self.zoomLevel = 0
+    end
+
+    self.zoomLevel = self.zoomLevel + (y > 0 and 1 or -1)
+    view.Spatial.size.y = math.pow(0.85, self.zoomLevel) * self.zoomBase
 end

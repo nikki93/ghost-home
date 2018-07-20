@@ -32,9 +32,20 @@ function Editor:remove()
 end
 
 
-function Editor:update(...)
+-- Call a function on all dependents, skipping if not in edit mode
+function Editor:forwardEvent(evtName, ...)
     if not self.enabled then return end
 
+    -- Forward to dependents
+    for dependent in pairs(self.__dependents) do
+        if dependent[evtName] then
+            dependent[evtName](dependent, ...)
+        end
+    end
+end
+
+
+function Editor:update(...)
     -- Remove destroyed entities from `self.selected`
     for ent in pairs(self.selected) do
         if ent.destroyed then
@@ -42,24 +53,12 @@ function Editor:update(...)
         end
     end
 
-    -- Forward to dependents
-    for dependent in pairs(self.__dependents) do
-        if dependent.update then
-            dependent:update(...)
-        end
-    end
+    self:forwardEvent('update', ...)
 end
 
 
 function Editor:draw(...)
-    if not self.enabled then return end
-
-    -- Forward to dependents
-    for dependent in pairs(self.__dependents) do
-        if dependent.drawOverlay then
-            dependent:drawOverlay(...)
-        end
-    end
+    self:forwardEvent('drawOverlay', ...)
 end
 
 
@@ -96,7 +95,7 @@ local function genBinding(suffix)
     return prefix .. suffix
 end
 
--- Execute the mapping for `binding`, passing it the extra parameters given.
+-- Execute the mapping for `binding`, passing it the extra parameters given
 function Editor:executeBinding(binding, ...)
     -- Special case: Is this the main toggle binding? If so, toggle and abort.
     if binding == self.bindings.mainToggle then
@@ -165,13 +164,11 @@ function Editor:mousereleased(...)
 end
 
 function Editor:mousemoved(...)
-    if not self.enabled then return end
+    self:forwardEvent('mousemoved', ...)
+end
 
-    -- Forward to dependents
-    for dependent in pairs(self.__dependents) do
-        if dependent.mousemoved then
-            dependent:mousemoved(...)
-        end
-    end
+function Editor:wheelmoved(...)
+    if tui.wantMouse() then return end
+    self:executeBinding(genBinding('wheelmoved'), ...)
 end
 
