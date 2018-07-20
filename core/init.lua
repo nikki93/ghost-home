@@ -59,14 +59,16 @@ local editor = core.entity.new {
         },
     },
     EditorTUI = {
-        componentOrder = { -- Show these components before other ones, in this order
+        componentOrder = {
+            -- Show these components before other ones, in this order
             'Default',
             'Spatial',
             'Visual',
             'Update',
             'Sprite',
         },
-        hiddenProps = { -- Hide these props across all components
+        hiddenProps = {
+            -- Hide these props across all components
             ent = true,
         },
     },
