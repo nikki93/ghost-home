@@ -47,24 +47,20 @@ local editor = core.entity.new {
     Editor = {
         enabled = false, -- Whether editing is initially enabled
         view = editorView, -- `View` to render from while editing
-        mode = 'default', -- Initial mode
+        mode = 'none', -- Initial mode
         bindings = {
             mainToggle = 'ctrl_e', -- Toggles whether editing is enabled
-            default = {
-                mouse1 = 'EditorSpatialSelect.selectSingle',
+            all = {
+                escape = 'exit',
                 v = 'EditorViewPan.enter',
                 s = 'EditorSpatialSelect.enter',
             },
             EditorViewPan = {
-                escape = 'exit',
                 mouse1dragged = 'pan',
                 wheelmoved = 'zoom',
-                v = 'exit',
             },
             EditorSpatialSelect = {
-                escape = 'exit',
                 mouse1 = 'selectSingle',
-                s = 'exit',
             },
         },
     },
@@ -82,9 +78,9 @@ local editor = core.entity.new {
             ent = true,
         },
     },
+    EditorViewPan = {},
     EditorSpatialSelected = {},
     EditorSpatialSelect = {},
-    EditorViewPan = {},
 }
 
 

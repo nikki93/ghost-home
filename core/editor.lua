@@ -22,7 +22,7 @@ function Editor:add()
 
     -- State
     self.enabled = false -- Whether we are in edit-mode
-    self.mode = 'default' -- Current mode
+    self.mode = 'none' -- Current mode
     self.bindings = {} -- Table of mode -> binding -> mapping
     self.selected = {} -- Currently selected entities as keys
 end
@@ -31,6 +31,23 @@ function Editor:remove()
     singleton = nil
 end
 
+
+function Editor:enterMode(mode, ...)
+    -- `:exit()` on previous mode
+    if self.mode ~= 'none' then
+        local comp = self.ent[self.mode]
+        if comp.exit then comp.exit(comp) end
+    end
+
+    if mode ~= 'none' then
+        -- `:enter()` on new mode if not 'none'
+        local comp = assert(self.ent[mode], "no component for editor mode '" .. mode .. "'")
+        self.mode = mode -- Only do this after verifying `comp` is found
+        if comp.enter then comp.enter(comp, ...) end
+    else
+        self.mode = mode
+    end
+end
 
 -- Call a function on all dependents in current mode
 function Editor:forwardEvent(evtName, ...)
@@ -108,46 +125,43 @@ function Editor:executeBinding(binding, ...)
     if not self.enabled then return end
 
     -- Find the mapping
-    local modeMappings = self.bindings[self.mode]
-    if not modeMappings then return end
-    local mapping = modeMappings[binding]
+    local mapping = (self.bindings[self.mode] and self.bindings[self.mode][binding]) or
+            (self.bindings.all and self.bindings.all[binding])
+    if not mapping then return end
 
     -- Split the '<component>.<member>' format
-    if not mapping then return end
     local componentName = mapping:match('^[^.]*')
     local memberName = mapping:match('[^.]*$')
-
-    -- If just '<member>' format, component name is mode name
     if componentName == memberName then
+        -- If just '<member>' format, component name is mode name
+        if self.mode == 'none' then return end
         componentName = self.mode
     end
 
-    -- Find the component instance and the member, then execute it
+    -- Find the component instance
     local component = self.ent[componentName]
     if not component then
         error("component '" .. componentName .. "' not found for editor binding '" ..
                 binding .. "'")
     end
-    local member = component[memberName]
-    if not member then
-        if memberName == 'enter' or memberName == 'exit' then
-            -- Default to no-op for 'enter' and 'exit' events
-            member = function() end
-        else
-            error("'" .. componentName "' doesn't have a member '" .. member .. "' for editor " ..
-                    "binding '" .. binding .. "'")
-        end
+
+    -- Mode '.enter' or '.exit'?
+    if memberName == 'enter' then
+        self:enterMode(componentName, ...)
+        return
+    end
+    if memberName == 'exit' then
+        self:enterMode('none')
+        return
     end
 
-    -- 'enter' and 'exit' events should set / unset `mode`
-    if memberName == 'enter' then
-        self.mode = componentName
+    -- Regular member, just find and call it
+    local member = component[memberName]
+    if not member then
+        error("'" .. componentName "' doesn't have a member '" .. member .. "' for editor " ..
+                "binding '" .. binding .. "'")
     end
-    local succeeded, err = pcall(member, component, ...)
-    if memberName == 'exit' then
-        self.mode = 'default'
-    end
-    if not succeeded then error(err, 0) end
+    member(component, ...)
 end
 
 function Editor:keypressed(key, scancode, isrepeat, ...)
