@@ -52,8 +52,8 @@ local editor = core.entity.new {
             mainToggle = 'ctrl_e', -- Toggles whether editing is enabled
             all = {
                 escape = 'exit',
-                v = 'EditorViewPan.enter',
-                s = 'EditorSpatialSelect.enter',
+                v = 'EditorViewPan',
+                s = 'EditorSpatialSelect',
             },
             EditorViewPan = {
                 mouse1dragged = 'pan',

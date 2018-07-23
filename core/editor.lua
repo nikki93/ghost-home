@@ -33,6 +33,9 @@ end
 
 
 function Editor:enterMode(mode, ...)
+    -- Already in mode? Skip.
+    if self.mode == mode then return end
+
     -- `:exit()` on previous mode
     if self.mode ~= 'none' then
         local comp = self.ent[self.mode]
@@ -133,9 +136,14 @@ function Editor:executeBinding(binding, ...)
     local componentName = mapping:match('^[^.]*')
     local memberName = mapping:match('[^.]*$')
     if componentName == memberName then
-        -- If just '<member>' format, component name is mode name
-        if self.mode == 'none' then return end
-        componentName = self.mode
+        if self.ent[componentName] then
+            -- Just '<mode>' format, toggle the modsd
+            memberName = self.mode == componentName and 'exit' or 'enter'
+        else
+            -- Just '<member>' format, use current mode as component
+            if self.mode == 'none' then return end
+            componentName = self.mode
+        end
     end
 
     -- Find the component instance
