@@ -52,10 +52,19 @@ local editor = core.entity.new {
             mainToggle = 'ctrl_e', -- Toggles whether editing is enabled
             default = {
                 mouse1 = 'EditorSpatialSelect.selectSingle',
-                shift_mouse1_pressed = 'EditorViewPan.panStart',
-                shift_mouse1_released = 'EditorViewPan.panEnd',
-                mouse1_released = 'EditorViewPan.panEnd',
-                shift_wheelmoved = 'EditorViewPan.zoom'
+                v = 'EditorViewPan.enter',
+                s = 'EditorSpatialSelect.enter',
+            },
+            EditorViewPan = {
+                escape = 'exit',
+                mouse1dragged = 'pan',
+                wheelmoved = 'zoom',
+                v = 'exit',
+            },
+            EditorSpatialSelect = {
+                escape = 'exit',
+                mouse1 = 'selectSingle',
+                s = 'exit',
             },
         },
     },
@@ -73,7 +82,7 @@ local editor = core.entity.new {
             ent = true,
         },
     },
-    EditorSpatialBBoxes = {},
+    EditorSpatialSelected = {},
     EditorSpatialSelect = {},
     EditorViewPan = {},
 }

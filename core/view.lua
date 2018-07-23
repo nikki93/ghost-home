@@ -55,30 +55,18 @@ local EditorViewPan = core.entity.newComponentType('EditorViewPan', {
 })
 
 function EditorViewPan:add()
-    self.panning = false
     self.zoomLevel = 0
     self.zoomBase = 0
 end
 
-function EditorViewPan:mousemoved(x, y, dx, dy)
-    if self.panning then
-        -- Compute the delta in the world position pointed at by the mouse
-        local view = self.Editor.view
-        local worldX, worldY = view.View:toWorldSpace(x, y)
-        local prevWorldX, prevWorldY = view.View:toWorldSpace(x - dx, y - dy)
-        view.Spatial.position = {
-            x = view.Spatial.position.x - (worldX - prevWorldX),
-            y = view.Spatial.position.y - (worldY - prevWorldY),
-        }
-    end
-end
-
-function EditorViewPan:panStart(x, y)
-    self.panning = true
-end
-
-function EditorViewPan:panEnd()
-    self.panning = false
+function EditorViewPan:pan(x, y, dx, dy)
+    local view = self.Editor.view
+    local worldX, worldY = view.View:toWorldSpace(x, y)
+    local prevWorldX, prevWorldY = view.View:toWorldSpace(x - dx, y - dy)
+    view.Spatial.position = {
+        x = view.Spatial.position.x - (worldX - prevWorldX),
+        y = view.Spatial.position.y - (worldY - prevWorldY),
+    }
 end
 
 function EditorViewPan:zoom(x, y)

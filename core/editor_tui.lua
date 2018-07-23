@@ -6,6 +6,7 @@ local EditorTUI = core.entity.newComponentType('EditorTUI', {
 })
 
 function EditorTUI:add()
+    self.mode = 'all'
     self.componentOrder = {}
     self.hiddenProps = {}
 end

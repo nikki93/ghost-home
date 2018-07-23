@@ -32,13 +32,14 @@ function Editor:remove()
 end
 
 
--- Call a function on all dependents, skipping if not in edit mode
+-- Call a function on all dependents in current mode
 function Editor:forwardEvent(evtName, ...)
     if not self.enabled then return end
 
-    -- Forward to dependents
+    -- For now, go through all dependents to handle `dependent.mode == 'all'` cases
     for dependent in pairs(self.__dependents) do
-        if dependent[evtName] then
+        if (dependent.mode == 'all' or dependent.mode == self.mode or
+                dependent.__typeName == self.mode) and dependent[evtName] then
             dependent[evtName](dependent, ...)
         end
     end
@@ -116,6 +117,11 @@ function Editor:executeBinding(binding, ...)
     local componentName = mapping:match('^[^.]*')
     local memberName = mapping:match('[^.]*$')
 
+    -- If just '<member>' format, component name is mode name
+    if componentName == memberName then
+        componentName = self.mode
+    end
+
     -- Find the component instance and the member, then execute it
     local component = self.ent[componentName]
     if not component then
@@ -123,48 +129,58 @@ function Editor:executeBinding(binding, ...)
                 binding .. "'")
     end
     local member = component[memberName]
-    if not component then
-        error("'" .. componentName "' doesn't have a member '" .. member .. "' for editor " ..
-                "binding '" .. binding .. "'")
+    if not member then
+        if memberName == 'enter' or memberName == 'exit' then
+            -- Default to no-op for 'enter' and 'exit' events
+            member = function() end
+        else
+            error("'" .. componentName "' doesn't have a member '" .. member .. "' for editor " ..
+                    "binding '" .. binding .. "'")
+        end
     end
-    member(component, ...)
+
+    -- 'enter' and 'exit' events should set / unset `mode`
+    if memberName == 'enter' then
+        self.mode = componentName
+    end
+    local succeeded, err = pcall(member, component, ...)
+    if memberName == 'exit' then
+        self.mode = 'default'
+    end
+    if not succeeded then error(err, 0) end
 end
 
--- Execute a key binding with the given suffix for Love callback parameters -- skipping if the
--- editor doesn't have keyboard focus
-function Editor:executeKeyBinding(suffix, key, scancode, isrepeat)
-    if tui.wantKeyboard() then return end -- TUI has hold of keyboard?
+function Editor:keypressed(key, scancode, isrepeat, ...)
+    if tui.wantKeyboard() then return end
     if isrepeat then return end -- Repeat keypress? (while key is held down)
-    self:executeBinding(genBinding(key) .. suffix, key, scancode, isrepeat)
+    self:executeBinding(genBinding(key) .. '_pressed', key, scancode, isrepeat, ...)
+    self:executeBinding(genBinding(key), key, scancode, isrepeat, ...)
 end
 
--- Execute a mouse binding with the given suffix for Love callback parameters -- skipping if the
--- editor doesn't have mouse focus
-function Editor:executeMouseBinding(suffix, x, y, button, istouch)
-    if tui.wantMouse() then return end -- TUI has hold of mouse?
-    self:executeBinding(genBinding('mouse' .. tostring(button)) .. suffix, x, y, button, istouch)
+function Editor:keyreleased(key, ...)
+    if tui.wantKeyboard() then return end
+    self:executeBinding(genBinding(key) .. '_released', key, ...)
 end
 
-function Editor:keypressed(...)
-    self:executeKeyBinding('_pressed', ...)
-    self:executeKeyBinding('', ...)
+function Editor:mousepressed(x, y, button, ...)
+    if tui.wantMouse() then return end
+    self:executeBinding(genBinding('mouse' .. tostring(button)) .. '_pressed', x, y, button, ...)
+    self:executeBinding(genBinding('mouse' .. tostring(button)), x, y, button, ...)
 end
 
-function Editor:keyreleased(...)
-    self:executeKeyBinding('_released', ...)
-end
-
-function Editor:mousepressed(...)
-    self:executeMouseBinding('_pressed', ...)
-    self:executeMouseBinding('', ...)
-end
-
-function Editor:mousereleased(...)
-    self:executeMouseBinding('_released', ...)
+function Editor:mousereleased(x, y, button, ...)
+    if tui.wantMouse() then return end
+    self:executeBinding(genBinding('mouse' .. tostring(button)) .. '_released', x, y, button, ...)
 end
 
 function Editor:mousemoved(...)
-    self:forwardEvent('mousemoved', ...)
+    if tui.wantMouse() then return end
+    for button = 1, 3 do
+        if love.mouse.isDown(button) then
+            self:executeBinding(genBinding('mouse' .. tostring(button) .. 'dragged'), ...)
+        end
+    end
+    self:executeBinding(genBinding('mousemoved'), ...)
 end
 
 function Editor:wheelmoved(...)

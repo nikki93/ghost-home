@@ -21,13 +21,9 @@ function Spatial:intersectsPoint(x, y)
 end
 
 
--- `Editor` extension that draws bounding boxes of all `Spatial` entities
+-- `Editor` extensions
 
-local EditorSpatialBBoxes = core.entity.newComponentType('EditorSpatialBBoxes', {
-    depends = { 'Editor' },
-})
-
-function EditorSpatialBBoxes:drawOverlay()
+local function drawBBoxes(editor, ents)
     love.graphics.push('all')
 
     -- Scale line width so lines look 1 pixel wide always
@@ -36,11 +32,12 @@ function EditorSpatialBBoxes:drawOverlay()
     local scale = core.vec2.len(px - qx, py - qy)
     love.graphics.setLineWidth(1 / scale)
 
-    for ent, spatial in pairs(core.entity.componentTypes.Spatial:getAll()) do
+    for ent in pairs(ents) do
         if not ent.Default.hidden then
+            local spatial = ent.Spatial
             love.graphics.push()
 
-            if self.Editor.selected[ent] then
+            if editor.Editor.selected[ent] then
                 love.graphics.setColor(1, 0, 0)
             else
                 love.graphics.setColor(0, 1, 0)
@@ -60,12 +57,25 @@ function EditorSpatialBBoxes:drawOverlay()
     love.graphics.pop()
 end
 
+local EditorSpatialSelected = core.entity.newComponentType('EditorSpatialSelected', {
+    depends = { 'Editor' },
+})
 
--- `Editor` extension that allows selection of `Spatial` entities by clicking
+function EditorSpatialSelected:add()
+    self.mode = 'all'
+end
+
+function EditorSpatialSelected:drawOverlay()
+    drawBBoxes(self, self.Editor.selected)
+end
 
 local EditorSpatialSelect = core.entity.newComponentType('EditorSpatialSelect', {
     depends = { 'Editor' },
 })
+
+function EditorSpatialSelect:drawOverlay()
+    drawBBoxes(self, core.entity.componentTypes.Spatial:getAll())
+end
 
 function EditorSpatialSelect:selectSingle(x, y)
     -- Apply `View` transform
