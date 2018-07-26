@@ -50,16 +50,16 @@ end
 
 -- `Editor` extension for panning / zooming the editor `View`
 
-local EditorViewPan = core.entity.newComponentType('EditorViewPan', {
+local EditorViewNav = core.entity.newComponentType('EditorViewNav', {
     depends = { 'Editor' },
 })
 
-function EditorViewPan:add()
+function EditorViewNav:add()
     self.zoomLevel = 0
     self.zoomBase = 0
 end
 
-function EditorViewPan:pan(x, y, dx, dy)
+function EditorViewNav:pan(x, y, dx, dy)
     local view = self.Editor.view
     local worldX, worldY = view.View:toWorldSpace(x, y)
     local prevWorldX, prevWorldY = view.View:toWorldSpace(x - dx, y - dy)
@@ -69,7 +69,7 @@ function EditorViewPan:pan(x, y, dx, dy)
     }
 end
 
-function EditorViewPan:zoom(x, y)
+function EditorViewNav:zoom(x, y)
     local view = self.Editor.view
 
     -- No base height yet? Initialize
