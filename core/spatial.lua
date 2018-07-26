@@ -98,10 +98,12 @@ function EditorSpatialSelect:selectSingle(x, y)
         return
     end
 
-    -- Sort by `.Spatial.position.x`, break ties by `.Default.id`
+    -- Sort by distance to input, break ties by `.Default.id`
     table.sort(intersecting, function(a, b)
-        if a.Spatial.position.x ~= b.Spatial.position.x then
-            return a.Spatial.position.x < b.Spatial.position.x
+        local aDist = core.vec2.dist(x, y, a.Spatial.position.x, a.Spatial.position.y)
+        local bDist = core.vec2.dist(x, y, b.Spatial.position.x, b.Spatial.position.y)
+        if aDist ~= bDist then
+            return aDist < bDist
         end
         return a.Default.id < b.Default.id
     end)
