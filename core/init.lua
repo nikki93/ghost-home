@@ -89,7 +89,7 @@ local editor = core.entity.new {
         },
     },
     EditorViewPan = {},
-    EditorSpatialSelected = {},
+    EditorSpatialHighlightSelected = {},
     EditorSpatialSelect = {},
 }
 

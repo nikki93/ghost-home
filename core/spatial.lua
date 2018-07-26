@@ -57,15 +57,15 @@ local function drawBBoxes(editor, ents)
     love.graphics.pop()
 end
 
-local EditorSpatialSelected = core.entity.newComponentType('EditorSpatialSelected', {
+local EditorSpatialHighlightSelected = core.entity.newComponentType('EditorSpatialHighlightSelected', {
     depends = { 'Editor' },
 })
 
-function EditorSpatialSelected:add()
+function EditorSpatialHighlightSelected:add()
     self.mode = 'all'
 end
 
-function EditorSpatialSelected:drawOverlay()
+function EditorSpatialHighlightSelected:drawOverlay()
     drawBBoxes(self, self.Editor.selected)
 end
 
