@@ -65,6 +65,16 @@ local editor = core.entity.new {
         },
     },
     EditorTUI = {
+        modeButtons = {
+            {
+                mode = 'EditorViewPan',
+                icon = 'view',
+            },
+            {
+                mode = 'EditorSpatialSelect',
+                icon = 'select',
+            },
+        },
         componentOrder = {
             -- Show these components before other ones, in this order
             'Default',

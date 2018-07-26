@@ -9,6 +9,7 @@ function EditorTUI:add()
     self.mode = 'all'
     self.componentOrder = {}
     self.hiddenProps = {}
+    self.modeButtons = {}
 end
 
 
@@ -195,6 +196,28 @@ end
 
 function EditorTUI:update(dt)
     tui.inWindow('editor', function()
+        local nModeButtons = #self.modeButtons
+        for i = 1, nModeButtons do
+            local button = self.modeButtons[i]
+
+            -- Use active button color if already in mode
+            local r, g, b, a = tui.getStyleColorVec4(self.Editor.mode == button.mode and
+                    'ButtonHovered' or 'Button')
+            tui.withStyleColor('Button', r, g, b, a, function()
+                if tui.button(button.icon) then
+                     -- Toggle mode on click
+                    self.Editor:enterMode(self.Editor.mode == button.mode and 'none' or button.mode)
+                end
+            end)
+
+            -- All buttons on same line
+            if i < nModeButtons then
+                tui.sameLine()
+            end
+        end
+
+        tui.separator()
+
         tui.inChildResizable('entities', function()
             -- List of all entities
             local selected = self.Editor.selected
