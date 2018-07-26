@@ -137,7 +137,7 @@ local function propEditor(comp, propName, value)
 end
 
 
--- TUI block for component with name `key` in entity `ent`
+-- Prop editor for component with name `key` in entity `ent`
 function EditorTUI:editComponent(ent, key)
     local comp = ent[key]
 
@@ -167,7 +167,7 @@ function EditorTUI:editComponent(ent, key)
     end
 end
 
--- TUI block for entity `ent`
+-- Prop editor for a single entity
 function EditorTUI:editEntity(ent)
     -- Compute order to show components in
     local order = {}
@@ -194,65 +194,97 @@ function EditorTUI:editEntity(ent)
     end
 end
 
-function EditorTUI:update(dt)
-    tui.inWindow('editor', function()
-        local nModeButtons = #self.modeButtons
-        for i = 1, nModeButtons do
-            local button = self.modeButtons[i]
-
-            -- Use active button color if already in mode
-            local r, g, b, a = tui.getStyleColorVec4(self.Editor.mode == button.mode and
-                    'ButtonHovered' or 'Button')
-            tui.withStyleColor('Button', r, g, b, a, function()
-                if tui.button(button.icon) then
-                     -- Toggle mode on click
-                    self.Editor:enterMode(self.Editor.mode == button.mode and 'none' or button.mode)
+-- Prop editors for selected entities
+function EditorTUI:editSelectedEntities()
+    local first = next(self.Editor.selected)
+    if first then
+        if not next(self.Editor.selected, first) then
+            -- Single entity selected, just show an editor for that
+            self:editEntity(first)
+        else
+            -- Multiple entities selected, show multiple sections
+            for ent in pairs(self.Editor.selected) do
+                if tui.collapsingHeader(ent.Default.id) then
+                    tui.inChildResizable(ent.Default.id, function()
+                        self:editEntity(ent)
+                    end)
                 end
-            end)
-
-            -- All buttons on same line
-            if i < nModeButtons then
-                tui.sameLine()
             end
         end
+    end
+end
+
+-- Selectable list of all entities
+function EditorTUI:listAllEntities()
+    local selected = self.Editor.selected
+    for ent, default in pairs(core.entity.componentTypes.Default:getAll()) do
+        if not ent.Default.hidden then
+            -- Highlight if already selected
+            if tui.selectable(default.id, selected[ent]) then
+                -- Toggle on click
+                if selected[ent] then
+                    selected[ent] = nil
+                else
+                    selected[ent] = true
+                end
+            end
+        end
+    end
+end
+
+-- Selectable list of modes as buttons
+function EditorTUI:showModeButtons()
+    -- Collect map of mode -> binding, or mode -> `false` if no binding
+    local bindings = {}
+    for _, button in pairs(self.modeButtons) do
+        bindings[button.mode] = false
+    end
+    for binding, mapping in pairs(self.Editor.bindings.all or {}) do
+        local maybeMode = mapping:gsub('%.enter', '') -- Mapping would be '<mode>' or '<mode>.enter'
+        if bindings[maybeMode] ~= nil then
+            bindings[maybeMode] = binding
+        end
+    end
+
+    local nModeButtons = #self.modeButtons
+    for i = 1, nModeButtons do
+        local button = self.modeButtons[i]
+
+        -- Use active button color if already in mode
+        local r, g, b, a = tui.getStyleColorVec4(self.Editor.mode == button.mode and
+                'ButtonHovered' or 'Button')
+        tui.withStyleColor('Button', r, g, b, a, function()
+            local buttonText = button.icon
+            if bindings[button.mode] then
+                buttonText = buttonText .. ' (' .. bindings[button.mode] .. ')'
+            end
+            if tui.button(buttonText) then
+                -- Toggle mode on click
+                self.Editor:enterMode(self.Editor.mode == button.mode and 'none' or button.mode)
+            end
+        end)
+
+        -- All buttons on same line
+        if i < nModeButtons then
+            tui.sameLine()
+        end
+    end
+end
+
+function EditorTUI:update(dt)
+    tui.inWindow('editor', function()
+        -- Main editor window layout
+
+        self:showModeButtons()
 
         tui.separator()
 
         tui.inChildResizable('entities', function()
-            -- List of all entities
-            local selected = self.Editor.selected
-            for ent, default in pairs(core.entity.componentTypes.Default:getAll()) do
-                if not ent.Default.hidden then
-                    -- Highlight if already selected
-                    if tui.selectable(default.id, selected[ent]) then
-                        -- Toggle on click
-                        if selected[ent] then
-                            selected[ent] = nil
-                        else
-                            selected[ent] = true
-                        end
-                    end
-                end
-            end
+            self:listAllEntities()
         end)
 
         tui.inChild('selected', function()
-            local first = next(self.Editor.selected)
-            if first then
-                if not next(self.Editor.selected, first) then
-                    -- Single entity selected, just show an editor for that
-                    self:editEntity(first)
-                else
-                    -- Multiple entities selected, show multiple sections
-                    for ent in pairs(self.Editor.selected) do
-                        if tui.collapsingHeader(ent.Default.id) then
-                            tui.inChildResizable(ent.Default.id, function()
-                                self:editEntity(ent)
-                            end)
-                        end
-                    end
-                end
-            end
+            self:editSelectedEntities()
         end)
     end)
 end
