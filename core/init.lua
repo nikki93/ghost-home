@@ -61,6 +61,7 @@ local editor = core.entity.new {
             },
             EditorSpatialSelect = {
                 mouse1 = 'selectSingle',
+                shift_mouse1 = 'selectMultiple',
             },
         },
     },

@@ -77,25 +77,14 @@ function EditorSpatialSelect:drawOverlay()
     drawBBoxes(self, core.entity.componentTypes.Spatial:getAll())
 end
 
-function EditorSpatialSelect:selectSingle(x, y)
-    -- Apply `View` transform
-    local view = self.Editor.view
-    if view then
-        x, y = view.View:toWorldSpace(x, y)
-    end
+function EditorSpatialSelect:_getEntitiesIntersecting(x, y)
+    x, y = self.Editor.view.View:toWorldSpace(x, y)
 
-    -- Find all intersecting `Spatial`s
     local intersecting = {}
     for ent, spatial in pairs(core.entity.componentTypes.Spatial:getAll()) do
         if not ent.Default.hidden and spatial:intersectsPoint(x, y) then
             table.insert(intersecting, ent)
         end
-    end
-
-    -- Empty?
-    if not next(intersecting) then
-        self.Editor.selected = {}
-        return
     end
 
     -- Sort by distance to input, break ties by `.Default.id`
@@ -108,6 +97,18 @@ function EditorSpatialSelect:selectSingle(x, y)
         return a.Default.id < b.Default.id
     end)
 
+    return intersecting
+end
+
+function EditorSpatialSelect:selectSingle(x, y)
+    local intersecting = self:_getEntitiesIntersecting(x, y)
+
+    -- Empty?
+    if not next(intersecting) then
+        self.Editor.selected = {}
+        return
+    end
+
     -- If one of them was previously selected, select the next thing
     table.insert(intersecting, intersecting[1]) -- Duplicate first at end to wrap
     for i = 1, #intersecting - 1 do
@@ -119,4 +120,20 @@ function EditorSpatialSelect:selectSingle(x, y)
 
     -- Else just select first
     self.Editor.selected = { [intersecting[1]] = true }
+end
+
+function EditorSpatialSelect:selectMultiple(x, y)
+    local intersecting = self:_getEntitiesIntersecting(x, y)
+    if not next(intersecting) then return end -- Empty?
+
+    -- If one of them isn't selected, select it
+    for _, ent in ipairs(intersecting) do
+        if not self.Editor.selected[ent] then
+            self.Editor.selected[ent] = true
+            return
+        end
+    end
+
+    -- Otherwise deselect the first
+    self.Editor.selected[intersecting[1]] = nil
 end
