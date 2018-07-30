@@ -160,10 +160,11 @@ function EditorSpatialMove:move(x, y, dx, dy)
     local prevWorldX, prevWorldY = view.View:toWorldSpace(x - dx, y - dy)
     local worldDX, worldDY = worldX - prevWorldX, worldY - prevWorldY
     for ent in pairs(self.Editor.selected) do
-        if ent.Spatial then
-            ent.Spatial.position = {
-                x = ent.Spatial.position.x + (worldX - prevWorldX),
-                y = ent.Spatial.position.y + (worldY - prevWorldY),
+        local spatial = ent.Spatial
+        if spatial then
+            spatial.position = {
+                x = spatial.position.x + worldDX,
+                y = spatial.position.y + worldDY,
             }
         end
     end
