@@ -21,7 +21,10 @@ function Spatial:intersectsPoint(x, y)
 end
 
 
+
+----------------------------------------------------------------------------------------------------
 -- `Editor` extensions
+
 
 local function drawBBoxes(editor, ents)
     love.graphics.push('all')
@@ -57,6 +60,9 @@ local function drawBBoxes(editor, ents)
     love.graphics.pop()
 end
 
+
+-- Highlight
+
 local EditorSpatialHighlightSelected = core.entity.newComponentType('EditorSpatialHighlightSelected', {
     depends = { 'Editor' },
 })
@@ -68,6 +74,9 @@ end
 function EditorSpatialHighlightSelected:drawOverlay()
     drawBBoxes(self, self.Editor.selected)
 end
+
+
+-- Select
 
 local EditorSpatialSelect = core.entity.newComponentType('EditorSpatialSelect', {
     depends = { 'Editor' },
@@ -136,4 +145,26 @@ function EditorSpatialSelect:selectMultiple(x, y)
 
     -- Otherwise deselect the first
     self.Editor.selected[intersecting[1]] = nil
+end
+
+
+-- Move
+
+local EditorSpatialMove = core.entity.newComponentType('EditorSpatialMove', {
+    depends = { 'Editor' },
+})
+
+function EditorSpatialMove:move(x, y, dx, dy)
+    local view = self.Editor.view
+    local worldX, worldY = view.View:toWorldSpace(x, y)
+    local prevWorldX, prevWorldY = view.View:toWorldSpace(x - dx, y - dy)
+    local worldDX, worldDY = worldX - prevWorldX, worldY - prevWorldY
+    for ent in pairs(self.Editor.selected) do
+        if ent.Spatial then
+            ent.Spatial.position = {
+                x = ent.Spatial.position.x + (worldX - prevWorldX),
+                y = ent.Spatial.position.y + (worldY - prevWorldY),
+            }
+        end
+    end
 end
