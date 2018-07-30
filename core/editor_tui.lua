@@ -278,12 +278,37 @@ function EditorTUI:showModeButtons()
     end
 end
 
+-- Edit settings for a mode
+function EditorTUI:editModeSettings(comp)
+    local settings = comp.settings
+    if not settings then return end
+
+    for key, value in pairs(settings) do
+        tui.withID(key, function()
+            -- Label for setting name
+            tui.alignTextToFramePadding()
+            tabbedText(key)
+            tui.sameLine()
+
+            -- Editor for setting value
+            local new, changed = propEditor(value)
+            if changed then settings[key] = new end
+        end)
+    end
+end
+
 
 function EditorTUI:update(dt)
     tui.inWindow('editor', function()
         -- Main editor window layout
 
         self:showModeButtons()
+
+        for dependent in pairs(self.__dependents) do
+            if dependent.__typeName == self.Editor.mode then
+                self:editModeSettings(dependent)
+            end
+        end
 
         tui.separator()
 
