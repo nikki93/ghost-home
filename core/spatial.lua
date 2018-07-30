@@ -150,14 +150,38 @@ end
 
 -- Move
 
+local function snap(value, step)
+    return step * math.floor(value / step)
+end
+
 local EditorSpatialMove = core.entity.newComponentType('EditorSpatialMove', {
-    depends = { 'Editor' },
+    depends = { 'Editor', 'EditorTUI' },
 })
+
+function EditorSpatialMove:add()
+    self.settings = {
+        snapEnabled = false,
+        snapStep = {
+            x = 32,
+            y = 32,
+        },
+    }
+end
 
 function EditorSpatialMove:move(x, y, dx, dy)
     local view = self.Editor.view
+
+    -- Previous and current position of mouse in world space
     local worldX, worldY = view.View:toWorldSpace(x, y)
     local prevWorldX, prevWorldY = view.View:toWorldSpace(x - dx, y - dy)
+    if self.settings.snapEnabled then
+        worldX = snap(worldX, self.settings.snapStep.x)
+        worldY = snap(worldY, self.settings.snapStep.y)
+        prevWorldX = snap(prevWorldX, self.settings.snapStep.x)
+        prevWorldY = snap(prevWorldY, self.settings.snapStep.y)
+    end
+
+    -- Apply that delta to all selected entities
     local worldDX, worldDY = worldX - prevWorldX, worldY - prevWorldY
     for ent in pairs(self.Editor.selected) do
         local spatial = ent.Spatial
