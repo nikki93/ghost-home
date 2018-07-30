@@ -21,8 +21,8 @@ local function tabbedText(text)
     tui.text((' '):rep(tabWidth * math.ceil(#text / tabWidth) - #text))
 end
 
--- Table of types to functions for a TUI for that type of prop. Each TUI function takes the current
--- value, and returns the new value and `true` if changed, or anything and `false` if unchanged.
+-- Table of types to functions for a TUI for that type of prop. See the `propEditor` function below
+-- to get an idea of what they take and return.
 local propEditors = {}
 
 -- Basic boolean: checkbox
@@ -122,22 +122,26 @@ function propEditors.table(value)
     return nil, false
 end
 
--- Common prop value editor entrypoint -- dispatches to one of the above based on type
-local function propEditor(comp, propName, value)
+-- Common prop value editor entrypoint dispatches to one of the above based on type. Takes the
+-- current value. Returns `new`, `changed`. If the value was edited, `new` is the `new` value and
+-- `changed` is `true`. If the value was unchanged, `changed` is `false`.
+local function propEditor(value)
     local propEditor = propEditors[getmetatable(value)] or propEditors[type(value)]
     if propEditor then
+        local new, changed
         tui.withItemWidth(-1, function()
-            local new, changed = propEditor(value)
-            if changed then comp[propName] = new end
+            new, changed = propEditor(value)
         end)
+        return new, changed
     else
         tui.alignTextToFramePadding()
         tui.text('<unsupported>')
+        return value, false
     end
 end
 
 
--- Prop editor for component with name `key` in entity `ent`
+-- Editor for component with name `key` in entity `ent`
 function EditorTUI:editComponent(ent, key)
     local comp = ent[key]
 
@@ -161,13 +165,14 @@ function EditorTUI:editComponent(ent, key)
                 tui.sameLine()
 
                 -- Editor for prop value
-                propEditor(comp, propName, comp[propName])
+                local new, changed = propEditor(comp[propName])
+                if changed then comp[propName] = new end
             end)
         end
     end
 end
 
--- Prop editor for a single entity
+-- Editor for a single entity
 function EditorTUI:editEntity(ent)
     -- Compute order to show components in
     local order = {}
@@ -194,7 +199,7 @@ function EditorTUI:editEntity(ent)
     end
 end
 
--- Prop editors for selected entities
+-- Editors for selected entities
 function EditorTUI:editSelectedEntities()
     local first = next(self.Editor.selected)
     if first then
@@ -214,6 +219,7 @@ function EditorTUI:editSelectedEntities()
     end
 end
 
+
 -- Selectable list of all entities
 function EditorTUI:listAllEntities()
     local selected = self.Editor.selected
@@ -231,6 +237,7 @@ function EditorTUI:listAllEntities()
         end
     end
 end
+
 
 -- Selectable list of modes as buttons
 function EditorTUI:showModeButtons()
@@ -270,6 +277,7 @@ function EditorTUI:showModeButtons()
         end
     end
 end
+
 
 function EditorTUI:update(dt)
     tui.inWindow('editor', function()
