@@ -166,7 +166,7 @@ function Editor:executeBinding(binding, ...)
     -- Regular member, just find and call it
     local member = component[memberName]
     if not member then
-        error("'" .. componentName "' doesn't have a member '" .. member .. "' for editor " ..
+        error("'" .. componentName .. "' doesn't have a member '" .. member .. "' for editor " ..
                 "binding '" .. binding .. "'")
     end
     member(component, ...)
