@@ -193,3 +193,7 @@ function EditorSpatialMove:move(x, y, dx, dy)
         end
     end
 end
+
+function EditorSpatialMove:toggleSnap()
+    self.settings.snapEnabled = not self.settings.snapEnabled
+end

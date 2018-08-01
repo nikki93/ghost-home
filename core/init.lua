@@ -52,9 +52,9 @@ local editor = core.entity.new {
             mainToggle = 'ctrl_e', -- Toggles whether editing is enabled
             all = {
                 escape = 'exit',
-                v = 'EditorViewNav',
-                s = 'EditorSpatialSelect',
-                m = 'EditorSpatialMove',
+                ['1'] = 'EditorViewNav',
+                ['2'] = 'EditorSpatialSelect',
+                ['3'] = 'EditorSpatialMove',
             },
             EditorViewNav = {
                 mouse1dragged = 'pan',
@@ -66,6 +66,7 @@ local editor = core.entity.new {
             },
             EditorSpatialMove = {
                 mouse1dragged = 'move',
+                s = 'toggleSnap',
             },
         },
     },
