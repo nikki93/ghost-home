@@ -174,6 +174,8 @@ function EditorSpatialMove:move(x, y, dx, dy)
     -- Previous and current position of mouse in world space
     local worldX, worldY = view.View:toWorldSpace(x, y)
     local prevWorldX, prevWorldY = view.View:toWorldSpace(x - dx, y - dy)
+
+    -- Apply snapping
     if self.settings.snapEnabled then
         worldX = snap(worldX, self.settings.snapStep.x)
         worldY = snap(worldY, self.settings.snapStep.y)
@@ -181,7 +183,7 @@ function EditorSpatialMove:move(x, y, dx, dy)
         prevWorldY = snap(prevWorldY, self.settings.snapStep.y)
     end
 
-    -- Apply that delta to all selected entities
+    -- Apply the delta to all selected entities
     local worldDX, worldDY = worldX - prevWorldX, worldY - prevWorldY
     for ent in pairs(self.Editor.selected) do
         local spatial = ent.Spatial
@@ -195,5 +197,58 @@ function EditorSpatialMove:move(x, y, dx, dy)
 end
 
 function EditorSpatialMove:toggleSnap()
+    self.settings.snapEnabled = not self.settings.snapEnabled
+end
+
+
+-- Rotate
+
+local EditorSpatialRotate = core.entity.newComponentType('EditorSpatialRotate', {
+    depends = { 'Editor', 'EditorTUI' },
+})
+
+function EditorSpatialRotate:add()
+    self.settings = {
+        snapEnabled = false,
+        snapStepDegrees = 45,
+    }
+end
+
+function EditorSpatialRotate:rotate(x, y, dx, dy)
+    -- Only supports one selected entity for now
+    -- TODO(nikki): Support multiple selected entities
+    local ent = next(self.Editor.selected)
+    if not ent then return end
+    local spatial = ent.Spatial
+    if not spatial then return end
+
+    local view = self.Editor.view
+
+    -- Previous and current angle of mouse in world space
+    local wX, wY = view.View:toWorldSpace(x, y)
+    local prevWX, prevWY = view.View:toWorldSpace(x - dx, y - dy)
+
+    -- Transform to local space and compute angles
+    local lX, lY = wX - spatial.position.x, wY - spatial.position.y
+    local prevLX, prevLY = prevWX - spatial.position.x, prevWY - spatial.position.y
+    local angle, prevAngle = math.atan2(lY, lX), math.atan2(prevLY, prevLX)
+
+    -- Apply snapping
+    if self.settings.snapEnabled then
+        angle = snap(angle, math.pi * self.settings.snapStepDegrees / 180.0)
+        prevAngle = snap(prevAngle, math.pi * self.settings.snapStepDegrees / 180.0)
+    end
+
+    -- Apply the delta to all selected entities
+    local dAngle = angle - prevAngle
+    for ent in pairs(self.Editor.selected) do
+        local spatial = ent.Spatial
+        if spatial then
+            spatial.rotation = spatial.rotation + dAngle
+        end
+    end
+end
+
+function EditorSpatialRotate:toggleSnap()
     self.settings.snapEnabled = not self.settings.snapEnabled
 end

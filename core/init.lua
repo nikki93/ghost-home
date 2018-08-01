@@ -55,6 +55,7 @@ local editor = core.entity.new {
                 ['1'] = 'EditorViewNav',
                 ['2'] = 'EditorSpatialSelect',
                 ['3'] = 'EditorSpatialMove',
+                ['4'] = 'EditorSpatialRotate',
             },
             EditorViewNav = {
                 mouse1dragged = 'pan',
@@ -68,6 +69,10 @@ local editor = core.entity.new {
                 mouse1dragged = 'move',
                 s = 'toggleSnap',
             },
+            EditorSpatialRotate = {
+                mouse1dragged = 'rotate',
+                s = 'toggleSnap',
+            },
         },
     },
     EditorTUI = {
@@ -78,11 +83,15 @@ local editor = core.entity.new {
             },
             {
                 mode = 'EditorSpatialSelect',
-                icon = 'select',
+                icon = 'sel',
             },
             {
                 mode = 'EditorSpatialMove',
-                icon = 'move',
+                icon = 'mov',
+            },
+            {
+                mode = 'EditorSpatialRotate',
+                icon = 'rot',
             },
         },
         componentOrder = {
@@ -102,6 +111,7 @@ local editor = core.entity.new {
     EditorSpatialHighlightSelected = {},
     EditorSpatialSelect = {},
     EditorSpatialMove = {},
+    EditorSpatialRotate = {},
 }
 
 
